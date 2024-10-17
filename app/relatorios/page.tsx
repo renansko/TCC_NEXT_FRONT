@@ -42,13 +42,17 @@ export default function Relatorios() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://localhost:3400/order/Prefeito'); // Substitua pela URL da sua API
-        console.log(response)
-        if (!response.ok) {
-          throw new Error('Erro ao buscar dados');
-        }
-        const data = await response.json();
-        setOrders(data);
+        //const response = await fetch('http://localhost:3400/order/Prefeito'); // Substitua pela URL da sua API
+        // console.log(response)
+        // if (!response.ok) {
+        //   throw new Error('Erro ao buscar dados');
+        // }
+        // const data = await response.json();
+        // if(response.ok){
+        //   setOrders(data);
+
+        // }
+          
 
         // Simula o carregamento de dados do cliente e orders
         await new Promise(resolve => setTimeout(resolve, 1000))
@@ -62,14 +66,13 @@ export default function Relatorios() {
           attachments: "/placeholder.svg"
         })
 
-        // Simula dados dos orders
-        // setorders([
-        //   { id: "001", dateRequested: new Date(2023, 9, 1), status: "realizado" },
-        //   { id: "002", dateRequested: new Date(2023, 9, 5), status: "pendente" },
-        //   { id: "003", dateRequested: new Date(2023, 9, 10), status: "atrasado" },
-        //   { id: "004", dateRequested: new Date(2023, 9, 15), status: "realizado" },
-        //   { id: "005", dateRequested: new Date(2023, 9, 20), status: "pendente" },
-        // ])
+        setOrders([
+          { id: "001", dateRequested: new Date(2023, 9, 1), status: "realizado" },
+          { id: "002", dateRequested: new Date(2023, 9, 5), status: "pendente" },
+          { id: "003", dateRequested: new Date(2023, 9, 10), status: "atrasado" },
+          { id: "004", dateRequested: new Date(2023, 9, 15), status: "realizado" },
+          { id: "005", dateRequested: new Date(2023, 9, 20), status: "pendente" },
+        ])
       } catch (err) {
         console.error("Erro ao carregar dados:", err)
         setError("Ocorreu um erro ao carregar os dados. Por favor, tente novamente.")

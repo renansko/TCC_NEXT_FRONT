@@ -10,10 +10,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { ThemeToggle } from "./ThemeToggle"
 
 export function Header() {
   return (
-    <header className="bg-white shadow-sm">
+    <header className="bg-background border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Sheet>
           <SheetTrigger asChild>
@@ -31,7 +32,7 @@ export function Header() {
             <nav className="mt-6">
               <ul className="space-y-4">
                 <li>
-                  <a href="/inicio"><Button variant="ghost" className="w-full justify-start">Início</Button></a>
+                  <a href="/menu"><Button variant="ghost" className="w-full justify-start">Início</Button></a>
                 </li>
                 <li>
                   <a href="/configuracoes"><Button variant="ghost" className="w-full justify-start">Configurações</Button></a>
@@ -43,6 +44,10 @@ export function Header() {
             </nav>
           </SheetContent>
         </Sheet>
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Minha Aplicação</h1>
+          <ThemeToggle />
+        </div>
         <nav>
           <ul className="flex space-x-4">
             <li>
