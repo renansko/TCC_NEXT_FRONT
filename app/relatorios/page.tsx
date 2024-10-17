@@ -20,48 +20,56 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 type Cliente = {
-  nome: string
-  empresa: string
-  cargo: string
-  dataNascimento: Date
-  foto: string
+  name: string
+  company: string
+  role: string
+  birth: Date
+  attachments: string
 }
 
-type Pedido = {
-  numero: string
-  data: Date
+type order = {
+  id: string
+  dateRequested: Date
   status: "realizado" | "pendente" | "atrasado"
 }
 
 export default function Relatorios() {
   const [cliente, setCliente] = useState<Cliente | null>(null)
-  const [pedidos, setPedidos] = useState<Pedido[]>([])
+  const [orders, setOrders] = useState<order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Simula o carregamento de dados do cliente e pedidos
+        const response = await fetch('http://localhost:3400/order/Prefeito'); // Substitua pela URL da sua API
+        console.log(response)
+        if (!response.ok) {
+          throw new Error('Erro ao buscar dados');
+        }
+        const data = await response.json();
+        setOrders(data);
+
+        // Simula o carregamento de dados do cliente e orders
         await new Promise(resolve => setTimeout(resolve, 1000))
         
         // Simula dados do cliente
         setCliente({
-          nome: "João Silva",
-          empresa: "Tech Solutions",
-          cargo: "Gerente de Projetos",
-          dataNascimento: new Date(1985, 5, 15),
-          foto: "/placeholder.svg"
+          name: "João Silva",
+          company: "Tech Solutions",
+          role: "Gerente de Projetos",
+          birth: new Date(1985, 5, 15),
+          attachments: "/placeholder.svg"
         })
 
-        // Simula dados dos pedidos
-        setPedidos([
-          { numero: "001", data: new Date(2023, 9, 1), status: "realizado" },
-          { numero: "002", data: new Date(2023, 9, 5), status: "pendente" },
-          { numero: "003", data: new Date(2023, 9, 10), status: "atrasado" },
-          { numero: "004", data: new Date(2023, 9, 15), status: "realizado" },
-          { numero: "005", data: new Date(2023, 9, 20), status: "pendente" },
-        ])
+        // Simula dados dos orders
+        // setorders([
+        //   { id: "001", dateRequested: new Date(2023, 9, 1), status: "realizado" },
+        //   { id: "002", dateRequested: new Date(2023, 9, 5), status: "pendente" },
+        //   { id: "003", dateRequested: new Date(2023, 9, 10), status: "atrasado" },
+        //   { id: "004", dateRequested: new Date(2023, 9, 15), status: "realizado" },
+        //   { id: "005", dateRequested: new Date(2023, 9, 20), status: "pendente" },
+        // ])
       } catch (err) {
         console.error("Erro ao carregar dados:", err)
         setError("Ocorreu um erro ao carregar os dados. Por favor, tente novamente.")
@@ -102,15 +110,15 @@ export default function Relatorios() {
               {cliente && (
                 <div className="flex flex-col items-center space-y-4">
                   <Avatar className="w-24 h-24">
-                    <AvatarImage src={cliente.foto} alt={cliente.nome} />
-                    <AvatarFallback>{cliente.nome.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={cliente.attachments} alt={cliente.name} />
+                    <AvatarFallback>{cliente.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="text-center">
-                    <h2 className="text-xl font-semibold">{cliente.nome}</h2>
-                    <p className="text-sm text-gray-500">{cliente.empresa}</p>
-                    <p className="text-sm text-gray-500">{cliente.cargo}</p>
+                    <h2 className="text-xl font-semibold">{cliente.name}</h2>
+                    <p className="text-sm text-gray-500">{cliente.company}</p>
+                    <p className="text-sm text-gray-500">{cliente.role}</p>
                     <p className="text-sm text-gray-500">
-                      Nascimento: {format(cliente.dataNascimento, "dd/MM/yyyy")}
+                      Nascimento: {format(cliente.birth, "dd/MM/yyyy")}
                     </p>
                   </div>
                 </div>
@@ -126,27 +134,27 @@ export default function Relatorios() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nº do Pedido</TableHead>
-                    <TableHead>Data do Pedido</TableHead>
+                    <TableHead>Nº do pedido</TableHead>
+                    <TableHead>Data do pedido</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pedidos.map((pedido) => (
-                    <TableRow key={pedido.numero}>
-                      <TableCell>{pedido.numero}</TableCell>
-                      <TableCell>{format(pedido.data, "dd/MM/yyyy")}</TableCell>
+                  {orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell>{order.id}</TableCell>
+                      <TableCell>{format(order.dateRequested, "dd/MM/yyyy")}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            pedido.status === "realizado"
+                            order.status === "realizado"
                               ? "bg-green-100 text-green-800"
-                              : pedido.status === "pendente"
+                              : order.status === "pendente"
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
                           }`}
                         >
-                          {pedido.status.charAt(0).toUpperCase() + pedido.status.slice(1)}
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
                       </TableCell>
                     </TableRow>
