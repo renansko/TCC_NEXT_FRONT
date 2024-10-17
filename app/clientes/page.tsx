@@ -99,7 +99,7 @@ export default function Clientes() {
                   <Calendar className="h-4 w-4" />
                   <span>{format(cliente.dataNascimento, "dd/MM/yyyy")}</span>
                 </div>
-                <Badge variant={cliente.isAdmin ? "default" : "secondary"}>
+                <Badge variant={cliente.isAdmin ? "success" : "default"}>
                   {cliente.isAdmin ? "Administrador" : "Usuário"}
                 </Badge>
               </div>
