@@ -23,7 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex min-h-screen bg-background text-foreground">
             <div className="flex-1">
               {!hideHeader && <Header />}
-              <main className="p-4">
+              <main>
                 {children}
               </main>
             </div>
