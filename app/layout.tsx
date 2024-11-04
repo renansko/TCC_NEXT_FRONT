@@ -10,6 +10,11 @@ const poppins = Poppins({
   variable: "--font-poppins",
 });
 
+export const metadata = {
+  title: "Logistica",
+  description: "Sistema de logistica",
+}
+
 export default function RootLayout({
   children,
 }: {

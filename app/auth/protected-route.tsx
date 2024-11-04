@@ -1,29 +1,36 @@
 "use client"
 
-// import { useAuth } from "@/app/contexts/auth-context"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  // const { user, isLoading } = useAuth()
-  const user = localStorage.getItem("user")
-  const isLoading = false
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const router = useRouter()
 
-  console.log(user)
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Check authentication only on client side
+    const user = localStorage?.getItem("user")
+    setIsAuthenticated(!!user)
+  }, [])
+
+  useEffect(() => {
+    // Only redirect if we've checked authentication
+    if (isAuthenticated === false) {
       router.push("/")
     }
-  }, [user, isLoading, router])
+  }, [isAuthenticated, router])
 
-  if (isLoading) {
-    return <div>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
       </div>
-    </div>
+    )
   }
 
-  return user ? <>{children}</> : null
+  // Only render children if authenticated
+  return isAuthenticated ? <>{children}</> : null
 } 
