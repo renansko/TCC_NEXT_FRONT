@@ -9,8 +9,8 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   useEffect(() => {
     // Check authentication only on client side
-    const user = localStorage?.getItem("user")
-    setIsAuthenticated(!!user)
+    const isAuth = localStorage?.getItem("isAuthenticated")
+    setIsAuthenticated(!!isAuth)
   }, [])
 
   useEffect(() => {

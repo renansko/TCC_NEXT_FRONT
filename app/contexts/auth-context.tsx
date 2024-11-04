@@ -14,29 +14,30 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   isLoading: boolean
+  isAuthenticated: boolean | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     checkAuth()
-  }, [])
+  }, [router])
 
   const checkAuth = async () => {
     try {
-      const token = sessionStorage.getItem("auth-token")
-      if (token) {
-        setUser({
-          id: "1",
-          email: "user@example.com",
-          name: "User"
-        })
-      }
+      // Check localStorage for authentication
+      const isAuth = localStorage?.getItem("isAuthenticated")
+      const user = localStorage?.getItem("user")
+      setIsAuthenticated(!!isAuth)
+      setUser(JSON.parse(user || "{ id: '', email: '', name: '' }"))
+      
+      router.push("/menu")
     } catch (error) {
       console.error("Erro ao verificar autenticação:", error)
     } finally {
@@ -53,13 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         id: "1",
         email,
         name: "User",
-        password
+        password,
       }
       
-      // Armazena token na sessão (mais seguro que localStorage)
-      sessionStorage.setItem("auth-token", "fake-token")
+      // Store authentication in localStorage
+      localStorage.setItem("isAuthenticated", "true")
       setUser(fakeUser)
-      router.push("/acompanhamento")
+      router.push("/acompanhamentos")
     } catch (error) {
       console.error("Erro no login:", error)
       throw error
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     setIsLoading(true)
     try {
-      sessionStorage.removeItem("auth-token")
+      localStorage.removeItem("isAuthenticated")
       setUser(null)
       router.push("/")
     } catch (error) {
@@ -82,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   )

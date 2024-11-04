@@ -70,6 +70,12 @@ const data: SidebarData = {
   },
   navMain: [
     {
+        title: "Dashboard",
+        url: "/menu",
+        icon: "home",
+        isActive: true,
+    },
+    {
       title: "Pedidos",
       url: "/pedidos",
       icon: "squareTerminal",
