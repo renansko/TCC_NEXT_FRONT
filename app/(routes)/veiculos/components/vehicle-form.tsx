@@ -17,13 +17,13 @@ import { Icons } from "@/components/ui/Icons"
 import { vehicleSchema } from "../schemas"
 import type { VehicleFormData } from "../types"
 import { useState } from "react"
-import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import Image from "next/image"
 
 interface VehicleFormProps {
   onSubmit: (data: VehicleFormData) => void
@@ -110,7 +110,7 @@ export function VehicleForm({ onSubmit, initialData }: VehicleFormProps) {
         <FormField
           control={form.control}
           name="imagem"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={({ field: {  ...field } }) => (
             <FormItem>
               <FormLabel>Imagem do Veículo</FormLabel>
               <FormControl>
@@ -139,16 +139,17 @@ export function VehicleForm({ onSubmit, initialData }: VehicleFormProps) {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={handleImageChange}
                       {...field}
+                      onChange={handleImageChange}
                     />
                   </div>
                   {previewImage && (
                     <div className="relative aspect-video w-full overflow-hidden rounded-lg border">
-                      <img
+                      <Image
                         src={previewImage}
                         alt="Preview"
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   )}

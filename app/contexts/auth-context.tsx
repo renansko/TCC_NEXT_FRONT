@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, _password: string) => {
+  const login = async (email: string, password: string) => {
     setIsLoading(true)
     try {
       await new Promise(resolve => setTimeout(resolve, 1000))
@@ -52,7 +52,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const fakeUser = {
         id: "1",
         email,
-        name: "User"
+        name: "User",
+        password
       }
       
       // Armazena token na sessão (mais seguro que localStorage)
