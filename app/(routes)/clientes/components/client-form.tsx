@@ -24,6 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { format } from "date-fns"
+import Image from "next/image"
 
 interface ClientFormProps {
   onSubmit: (data: ClientFormData) => void
@@ -167,7 +168,7 @@ export function ClientForm({ onSubmit, initialData }: ClientFormProps) {
         <FormField
           control={form.control}
           name="avatar"
-          render={({ field: { value, onChange, ...field } }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Avatar</FormLabel>
               <FormControl>
@@ -187,16 +188,21 @@ export function ClientForm({ onSubmit, initialData }: ClientFormProps) {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={handleImageChange}
                       {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleImageChange(e);
+                      }}
+                      value={field.value?.fileName}
                     />
                   </div>
                   {previewImage && (
                     <div className="relative h-20 w-20 overflow-hidden rounded-full">
-                      <img
+                      <Image
                         src={previewImage}
                         alt="Preview"
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                   )}

@@ -24,7 +24,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Verificar se há um usuário na sessão ao carregar
     checkAuth()
   }, [])
 
@@ -32,7 +31,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const token = sessionStorage.getItem("auth-token")
       if (token) {
-        // Simula verificação do token
         setUser({
           id: "1",
           email: "user@example.com",
@@ -46,13 +44,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, _password: string) => {
     setIsLoading(true)
     try {
-      // Simula chamada de API
       await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // Simula resposta bem-sucedida
       const fakeUser = {
         id: "1",
         email,

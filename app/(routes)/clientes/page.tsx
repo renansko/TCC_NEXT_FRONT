@@ -17,7 +17,7 @@ import { ClientCard } from "./components/client-card"
 import { OrdersTable } from "./components/orders-table"
 import { ClientForm } from "./components/client-form"
 import { mockClients, mockOrders } from "./data/mock"
-import type { Client, ClientFormData, Order } from "./types"
+import type { Client, ClientFormData } from "./types"
 
 export default function ClientesPage() {
   const [clients, setClients] = useState<Client[]>(mockClients)

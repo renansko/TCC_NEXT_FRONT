@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,22 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Icons } from "@/components/ui/Icons"
-import { SearchBar } from "./components/search-bar"
-import { VehicleForm } from "./components/vehicle-form"
-import { VehicleList } from "./components/vehicle-list"
-import { useVehicles } from "./hooks/use-vehicles"
-import type { Vehicle, VehicleFormData } from "./types"
+} from "@/components/ui/dialog";
+import { Icons } from "@/components/ui/Icons";
+import { SearchBar } from "./components/search-bar";
+import { VehicleForm } from "./components/vehicle-form";
+import { VehicleList } from "./components/vehicle-list";
+import { useVehicles } from "./hooks/use-vehicles";
+import type { Vehicle, VehicleFormData } from "./types";
 
 // Import your mock data
-import fordK from '../../public/FordK.jpeg'
-import gol from '../../public/Gol.jpeg'
-import uno from '../../public/Uno.jpg'
+import fordK from "../../public/FordK.jpeg";
+import gol from "../../public/Gol.jpeg";
+import uno from "../../public/Uno.jpg";
 
 export default function VeiculosPage() {
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const {
     vehicles,
@@ -33,27 +33,45 @@ export default function VeiculosPage() {
     handleFilterChange,
     createVehicle,
     updateVehicle,
-    deleteVehicle
+    deleteVehicle,
   } = useVehicles([
-    { id: "1", nome: "Fiat Uno", placa: "ABC-1234", disponivel: true, imagem: uno},
-    { id: "2", nome: "Ford Ka", placa: "DEF-5678", disponivel: false, imagem: fordK },
-    { id: "3", nome: "Volkswagen Gol", placa: "GHI-9012", disponivel: true, imagem: gol },
-  ])
+    {
+      id: "1",
+      nome: "Fiat Uno",
+      placa: "ABC-1234",
+      disponivel: true,
+      imagem: uno,
+    },
+    {
+      id: "2",
+      nome: "Ford Ka",
+      placa: "DEF-5678",
+      disponivel: false,
+      imagem: fordK,
+    },
+    {
+      id: "3",
+      nome: "Volkswagen Gol",
+      placa: "GHI-9012",
+      disponivel: true,
+      imagem: gol,
+    },
+  ]);
 
   const handleSubmit = (data: VehicleFormData) => {
     if (editingVehicle) {
-      updateVehicle(editingVehicle.id, data)
-      setEditingVehicle(null)
+      updateVehicle(editingVehicle.id, data);
+      setEditingVehicle(null);
     } else {
-      createVehicle(data)
+      createVehicle(data);
     }
-    setIsDialogOpen(false)
-  }
+    setIsDialogOpen(false);
+  };
 
   const handleEdit = (vehicle: Vehicle) => {
-    setEditingVehicle(vehicle)
-    setIsDialogOpen(true)
-  }
+    setEditingVehicle(vehicle);
+    setIsDialogOpen(true);
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -74,30 +92,29 @@ export default function VeiculosPage() {
                 {editingVehicle ? "Editar Veículo" : "Adicionar Novo Veículo"}
               </DialogTitle>
               <DialogDescription>
-                {editingVehicle 
+                {editingVehicle
                   ? "Faça as alterações necessárias nos detalhes do veículo."
-                  : "Preencha os detalhes do novo veículo aqui."
-                }
+                  : "Preencha os detalhes do novo veículo aqui."}
               </DialogDescription>
             </DialogHeader>
-            <VehicleForm 
+            <VehicleForm
               onSubmit={handleSubmit}
               initialData={editingVehicle || undefined}
             />
           </DialogContent>
         </Dialog>
 
-        <SearchBar 
+        <SearchBar
           onSearch={handleSearch}
           onFilterChange={handleFilterChange}
         />
       </motion.div>
 
-      <VehicleList 
+      <VehicleList
         vehicles={vehicles}
         onEdit={handleEdit}
         onDelete={deleteVehicle}
       />
     </div>
-  )
+  );
 }
