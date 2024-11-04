@@ -1,6 +1,6 @@
 "use client"
 
-import { useBreadcrumbs } from "@/app/hooks/useBreadcrumbs"
+import { useBreadcrumbs } from "@/hooks/use-breadcrumbs"
 import { 
   Breadcrumb, 
   BreadcrumbLink, 

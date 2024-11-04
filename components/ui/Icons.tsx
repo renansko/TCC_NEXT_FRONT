@@ -20,7 +20,20 @@ import {
   Sparkles,
   SquareTerminal,
   Trash2,
-  ArrowLeft
+  ArrowLeft,
+  Package,
+  List,
+  Plus,
+  Search,
+  Edit,
+  Trash,
+  Calendar,
+  Upload,
+  User,
+  Building2,
+  Mail,
+  ExternalLink,
+  Truck
 } from "lucide-react";
 
 type IconProps = React.HTMLAttributes<SVGElement>
@@ -181,6 +194,7 @@ export const Icons = {
   bell: Bell,
   bookOpen: BookOpen,
   bot: Bot,
+  calendar: Calendar,
   chevronRight: ChevronRight,
   chevronsUpDown: ChevronsUpDown,
   command: Command,
@@ -198,4 +212,16 @@ export const Icons = {
   sparkles: Sparkles,
   squareTerminal: SquareTerminal,
   trash2: Trash2,
+  package: Package,
+  list: List,
+  plus: Plus,
+  search: Search,
+  edit: Edit,
+  trash: Trash,
+  upload: Upload,
+  user: User,
+  building2: Building2,
+  mail: Mail,
+  externalLink: ExternalLink,
+  truck: Truck,
 }

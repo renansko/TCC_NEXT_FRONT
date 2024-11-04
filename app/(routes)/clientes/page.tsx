@@ -1,149 +1,138 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { format } from "date-fns"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { User, Building2, Calendar } from "lucide-react"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Icons } from "@/components/ui/Icons"
+import { ClientNav } from "./components/client-nav"
+import { ClientCard } from "./components/client-card"
+import { OrdersTable } from "./components/orders-table"
+import { ClientForm } from "./components/client-form"
+import { mockClients, mockOrders } from "./data/mock"
+import type { Client, ClientFormData, Order } from "./types"
 
-type Cliente = {
-  id: string
-  nome: string
-  empresa: string
-  isAdmin: boolean
-  dataNascimento: Date
-  avatar: string
-}
+export default function ClientesPage() {
+  const [clients, setClients] = useState<Client[]>(mockClients)
+  const [selectedClientId, setSelectedClientId] = useState(clients[0]?.id)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-type Pedido = {
-  id: string
-  numeroPedido: string
-  dataPedido: Date
-  status: "concluido" | "cancelado" | "Em rota de entrega"
-}
+  const selectedClient = clients.find(client => client.id === selectedClientId)
+  const clientOrders = mockOrders.filter(order => order.clientId === selectedClientId)
 
-const clienteMock: Cliente = {
-  id: "1",
-  nome: "João Silva",
-  empresa: "Tech Solutions",
-  isAdmin: true,
-  dataNascimento: new Date(1985, 5, 15),
-  avatar: "/placeholder.svg"
-}
-
-const pedidosMock: Pedido[] = [
-  { id: "1", numeroPedido: "PED001", dataPedido: new Date(2023, 9, 1), status: "concluido" },
-  { id: "2", numeroPedido: "PED002", dataPedido: new Date(2023, 9, 5), status: "cancelado" },
-  { id: "3", numeroPedido: "PED003", dataPedido: new Date(2023, 9, 10), status: "Em rota de entrega" },
-  { id: "4", numeroPedido: "PED004", dataPedido: new Date(2023, 9, 15), status: "concluido" },
-  { id: "5", numeroPedido: "PED005", dataPedido: new Date(2023, 9, 20), status: "Em rota de entrega" },
-]
-
-export default function Clientes() {
-  const [cliente, setCliente] = useState<Cliente | null>(null)
-  const [pedidos, setPedidos] = useState<Pedido[]>([])
-
-  useEffect(() => {
-    // Simula o carregamento de dados do cliente e pedidos
-    const fetchData = async () => {
-      // Aqui você faria a chamada real para sua API
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setCliente(clienteMock)
-      setPedidos(pedidosMock)
+  const handleCreateClient = (data: ClientFormData) => {
+    const newClient = {
+      ...data,
+      id: Math.random().toString(36).substr(2, 9),
+      avatar: data.avatar instanceof File 
+        ? URL.createObjectURL(data.avatar) 
+        : "/avatars/default.jpg"
     }
-
-    fetchData()
-  }, [])
-
-  if (!cliente) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    )
+    setClients(prev => [...prev, newClient])
+    setSelectedClientId(newClient.id)
+    setIsDialogOpen(false)
   }
 
+  const handleUpdateClient = (data: ClientFormData) => {
+    if (editingClient) {
+      setClients(prev => prev.map(client => 
+        client.id === editingClient.id
+          ? {
+              ...client,
+              ...data,
+              avatar: data.avatar instanceof File 
+                ? URL.createObjectURL(data.avatar) 
+                : client.avatar
+            }
+          : client
+      ))
+      setEditingClient(null)
+      setIsDialogOpen(false)
+    }
+  }
+
+  const handleDeleteClient = (id: string) => {
+    setClients(prev => prev.filter(client => client.id !== id))
+    if (selectedClientId === id) {
+      setSelectedClientId(clients.find(client => client.id !== id)?.id || "")
+    }
+  }
+
+  const handleEdit = (client: Client) => {
+    setEditingClient(client)
+    setIsDialogOpen(true)
+  }
+
+  if (!selectedClient) return null
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6">Detalhes do Cliente</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações do Cliente</CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-start space-x-4">
-              <Avatar className="w-24 h-24">
-                <AvatarImage src={cliente.avatar} alt={cliente.nome} />
-                <AvatarFallback>{cliente.nome.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span className="font-semibold">{cliente.nome}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Building2 className="h-4 w-4" />
-                  <span>{cliente.empresa}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4" />
-                  <span>{format(cliente.dataNascimento, "dd/MM/yyyy")}</span>
-                </div>
-                <Badge variant={cliente.isAdmin ? "success" : "default"}>
-                  {cliente.isAdmin ? "Administrador" : "Usuário"}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Pedidos Recentes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nº Pedido</TableHead>
-                    <TableHead>Data do Pedido</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pedidos.map((pedido) => (
-                    <TableRow key={pedido.id}>
-                      <TableCell>{pedido.numeroPedido}</TableCell>
-                      <TableCell>{format(pedido.dataPedido, "dd/MM/yyyy")}</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            pedido.status === "concluido"
-                              ? "success"
-                              : pedido.status === "cancelado"
-                              ? "destructive"
-                              : "default"
-                          }
-                        >
-                          {pedido.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+    <div className="container mx-auto p-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Clientes</h1>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Icons.plus className="mr-2 h-4 w-4" />
+              Novo Cliente
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>
+                {editingClient ? "Editar Cliente" : "Adicionar Novo Cliente"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingClient 
+                  ? "Faça as alterações necessárias nos detalhes do cliente."
+                  : "Preencha os detalhes do novo cliente aqui."
+                }
+              </DialogDescription>
+            </DialogHeader>
+            <ClientForm 
+              onSubmit={editingClient ? handleUpdateClient : handleCreateClient}
+              initialData={editingClient || undefined}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <ClientNav 
+        clients={clients}
+        selectedClientId={selectedClientId}
+        onSelectClient={setSelectedClientId}
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <motion.div
+          key={selectedClientId}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <ClientCard
+            client={selectedClient}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClient}
+          />
+        </motion.div>
+
+        <motion.div
+          key={`orders-${selectedClientId}`}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <OrdersTable orders={clientOrders} />
+        </motion.div>
+      </div>
     </div>
   )
 }
