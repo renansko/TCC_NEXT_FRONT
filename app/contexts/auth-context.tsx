@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkAuth()
-  }, [router])
+  }, [router, isAuthenticated])
 
   const checkAuth = async () => {
     try {

@@ -10,7 +10,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+  }, [isAuthenticated])
 
   // Don't render anything until we've checked auth status
   if (!mounted || isLoading) {
