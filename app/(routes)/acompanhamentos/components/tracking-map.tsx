@@ -33,19 +33,19 @@ export function TrackingMap({ truck }: TrackingMapProps) {
     }
 
     // Draw completed route
-    const completedRoute = L.polyline(
+    L.polyline(
       truck.rota.historicoPercurso.map(p => [p.lat, p.lng]),
       { color: '#22c55e', weight: 4 }
     ).addTo(routeLayerRef.current!)
 
     // Draw remaining route
-    const remainingRoute = L.polyline(
+    L.polyline(
       truck.rota.rotaPlanejada.map(p => [p.lat, p.lng]),
       { color: '#94a3b8', weight: 4, dashArray: '10, 10' }
     ).addTo(routeLayerRef.current!)
 
     // Add markers
-    const originMarker = L.marker([truck.rota.origem.lat, truck.rota.origem.lng], {
+    L.marker([truck.rota.origem.lat, truck.rota.origem.lng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="bg-green-500 rounded-full p-2">
@@ -56,7 +56,7 @@ export function TrackingMap({ truck }: TrackingMapProps) {
       })
     }).addTo(routeLayerRef.current!)
 
-    const destinationMarker = L.marker([truck.rota.destino.lat, truck.rota.destino.lng], {
+    L.marker([truck.rota.destino.lat, truck.rota.destino.lng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="bg-red-500 rounded-full p-2">
@@ -68,7 +68,7 @@ export function TrackingMap({ truck }: TrackingMapProps) {
     }).addTo(routeLayerRef.current!)
 
     // Add truck marker
-    const truckMarker = L.marker([truck.rota.pontoAtual.lat, truck.rota.pontoAtual.lng], {
+    L.marker([truck.rota.pontoAtual.lat, truck.rota.pontoAtual.lng], {
       icon: L.divIcon({
         className: 'custom-div-icon',
         html: `<div class="bg-blue-500 rounded-full p-2 animate-pulse">
