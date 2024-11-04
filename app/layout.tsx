@@ -12,9 +12,27 @@ const poppins = Poppins({
   variable: '--font-poppins',
 })
 
+export const metadata = {
+  title: "Logistica",
+  description: "Sistema de logistica",
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hideHeader = ['/','/register-usuario','/register-empresa'].includes(pathname);
+  const isNewRoute = pathname.startsWith('/new-route');
+
+  if (isNewRoute) {
+    return (
+      <html lang="pt-BR" className={`h-full ${poppins.variable}`}>
+        <body className="h-full font-poppins">
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="pt-BR" className={poppins.variable}>
