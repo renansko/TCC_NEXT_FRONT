@@ -2,16 +2,18 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
-  // Verifica se o usuário está autenticado
-  const isAuthenticated = request.cookies.get('auth-token') // Substitua pelo nome real do seu token de autenticação
+  const token = request.cookies.get('auth-token')?.value
+  const isAuthPage = request.nextUrl.pathname === "/" || 
+                    request.nextUrl.pathname.startsWith('/authentication')
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/acompanhamento')
 
-  // Se estiver acessando rotas protegidas e não estiver autenticado, redireciona para login
-  if (request.nextUrl.pathname.startsWith('/acompanhamento') && !isAuthenticated) {
+  // Redireciona usuários não autenticados para a página de login
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Se estiver acessando página de login enquanto autenticado, redireciona para acompanhamento
-  if (request.nextUrl.pathname === '/' && isAuthenticated) {
+  // Redireciona usuários autenticados para a página principal
+  if (isAuthPage && token) {
     return NextResponse.redirect(new URL('/acompanhamento', request.url))
   }
 
@@ -19,5 +21,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/acompanhamento/:path*']
+  matcher: ['/', '/authentication/:path*', '/acompanhamento/:path*']
 } 

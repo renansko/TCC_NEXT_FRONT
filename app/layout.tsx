@@ -1,35 +1,31 @@
-"use client";
-
-import { Poppins } from 'next/font/google'
-import './globals.css'
-import { ThemeProvider } from '@/components/ui/ThemeProvider'
-import { Header } from '@/components/ui/Header'
-import { usePathname } from 'next/navigation'
+import { Poppins } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { AuthProvider } from "./contexts/auth-context";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
-})
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-poppins",
+});
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const hideHeader = ['/','/register-usuario','/register-empresa'].includes(pathname);
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="pt-BR" className={poppins.variable}>
       <body className="font-poppins">
-        <ThemeProvider>
-          <div className="flex min-h-screen bg-background text-foreground">
-            <div className="flex-1">
-              {!hideHeader && <Header />}
-              <main>
-                {children}
-              </main>
-            </div>
-          </div>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <SidebarProvider>
+              {children}
+            </SidebarProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
-  )
+  );
 }

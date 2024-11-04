@@ -27,9 +27,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       
       // Define estado de autenticação
       localStorage.setItem("isAuthenticated", "true")
-      
+      localStorage.setItem("user", email)
       // Redireciona para página de acompanhamento
-      router.push("/acompanhamento")
+      router.push("/menu")
     } catch (error) {
       console.error("Erro de autenticação:", error)
     } finally {

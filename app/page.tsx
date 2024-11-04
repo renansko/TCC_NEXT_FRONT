@@ -2,12 +2,17 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import AuthenticationPage from "./authentication/page"
+import dynamic from "next/dynamic"
 
-// This is a placeholder - replace with your actual auth checking logic
+const AuthenticationPage = dynamic(() => import("./(routes)/authentication/page"), {
+  ssr: false,
+})
+
 const checkAuthStatus = () => {
-  // For now, we'll check localStorage, but you should implement proper auth checking
-  return localStorage.getItem("isAuthenticated") === "true"
+  if (typeof window !== "undefined") {
+    return sessionStorage.getItem("auth-token") !== null
+  }
+  return false
 }
 
 export default function Home() {
@@ -17,7 +22,7 @@ export default function Home() {
     const isAuthenticated = checkAuthStatus()
     
     if (isAuthenticated) {
-      router.push("/acompanhamento")
+      router.push("/menu")
     }
   }, [router])
 

@@ -1,33 +1,31 @@
+import {
+  BadgeCheck,
+  Bell,
+  BookOpen,
+  Bot,
+  ChevronRight,
+  ChevronsUpDown,
+  Command,
+  CreditCard,
+  Folder,
+  Frame,
+  LifeBuoy,
+  LogOut,
+  Map,
+  MoreHorizontal,
+  PieChart,
+  Send,
+  Settings2,
+  Share,
+  Sparkles,
+  SquareTerminal,
+  Trash2,
+  ArrowLeft
+} from "lucide-react";
+
 type IconProps = React.HTMLAttributes<SVGElement>
 
 export const Icons = {
-  logo: (props: IconProps) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" {...props}>
-      <rect width="256" height="256" fill="none" />
-      <line
-        x1="208"
-        y1="128"
-        x2="128"
-        y2="208"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="32"
-      />
-      <line
-        x1="192"
-        y1="40"
-        x2="40"
-        y2="192"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="32"
-      />
-    </svg>
-  ),
   twitter: (props: IconProps) => (
     <svg
       {...props}
@@ -145,4 +143,59 @@ export const Icons = {
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
     </svg>
   ),
+  logo: (props: IconProps) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none" 
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="mr-2 h-6 w-6"
+      {...props}
+    >
+      {/* Truck body */}
+      <path d="M3 12h12v5H3z" />
+      <path d="M15 12h4l2 3v2h-6v-5z" />
+      
+      {/* Wheels */}
+      <circle cx="7" cy="17" r="1.5" />
+      <circle cx="17" cy="17" r="1.5" />
+      
+      {/* Tech elements */}
+      <path d="M3 9h8" />
+      <path d="M3 7h6" />
+      <path d="M15 7h4" />
+      
+      {/* GPS/tracking lines */}
+      <path d="M20 4c1 1 2 3 2 5" />
+      <path d="M18 2c2 2 3 4 3 7" />
+      
+      {/* Digital display */}
+      <rect x="4" cy="4" width="6" height="2" rx="1" />
+    </svg>
+  ),
+  back: ArrowLeft,
+  badgeCheck: BadgeCheck,
+  bell: Bell,
+  bookOpen: BookOpen,
+  bot: Bot,
+  chevronRight: ChevronRight,
+  chevronsUpDown: ChevronsUpDown,
+  command: Command,
+  creditCard: CreditCard,
+  folder: Folder,
+  frame: Frame,
+  lifeBuoy: LifeBuoy,
+  logOut: LogOut,
+  map: Map,
+  moreHorizontal: MoreHorizontal,
+  pieChart: PieChart,
+  send: Send,
+  settings2: Settings2,
+  share: Share,
+  sparkles: Sparkles,
+  squareTerminal: SquareTerminal,
+  trash2: Trash2,
 }

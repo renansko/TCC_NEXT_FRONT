@@ -16,9 +16,9 @@ import {
 import { Label } from "@/components/ui/label"
 import { PlusIcon, SearchIcon, EditIcon, TrashIcon, Paperclip } from "lucide-react"
 import Image from "next/image"
-import fordK from '../public/FordK.jpeg'
-import gol from '../public/Gol.jpeg'
-import uno from '../public/Uno.jpg'
+import fordK from '../../public/FordK.jpeg'
+import gol from '../../public/Gol.jpeg'
+import uno from '../../public/Uno.jpg'
 import { StaticImageData } from "next/image"
 import {
   Tooltip,
