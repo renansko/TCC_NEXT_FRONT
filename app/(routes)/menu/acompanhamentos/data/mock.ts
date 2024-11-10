@@ -1,227 +1,342 @@
-import { TruckData } from "../types"
+import type { Route, RouteStatus, Vehicle, Driver, Client } from '../types';
 
-interface Location {
-  lat: number;
-  lng: number;
-}
+const routeStatuses: Record<RouteStatus['code'], RouteStatus> = {
+  pending: {
+    code: 'pending',
+    label: 'Pendente',
+    color: 'yellow',
+  },
+  in_progress: {
+    code: 'in_progress',
+    label: 'Em Andamento',
+    color: 'green',
+  },
+  completed: {
+    code: 'completed',
+    label: 'Concluída',
+    color: 'blue',
+  },
+  cancelled: {
+    code: 'cancelled',
+    label: 'Cancelada',
+    color: 'red',
+  },
+};
 
-const createMockRoute = (start: [number, number], end: [number, number], points: number): Location[] => {
-  const route: Location[] = []
-  for (let i = 0; i <= points; i++) {
-    route.push({
-      lat: start[0] + (end[0] - start[0]) * (i / points),
-      lng: start[1] + (end[1] - start[1]) * (i / points)
-    })
-  }
-  return route
-}
-
-export const mockTrucks: TruckData[] = [
+const mockVehicles: Vehicle[] = [
   {
-    id: "1",
-    placa: "ABC-1234",
-    motorista: "João Silva",
-    modelo: "Volvo FH 460",
-    status: "em_rota",
-    combustivel: 75,
-    velocidade: 80,
-    pedido: {
-      id: "PED001",
-      numero: "PED-2024-001",
-      cliente: "Tech Solutions",
-      status: "em_andamento",
-      tempoPercurso: 120,
-      tempoEstimado: 45
-    },
-    rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -22.906847, lng: -43.172897 }, // Rio de Janeiro
-      pontoAtual: { lat: -23.223684, lng: -44.903103 }, // Ponto intermediário
-      historicoPercurso: createMockRoute(
-        [-23.550520, -46.633309],
-        [-23.223684, -44.903103],
-        20
-      ).map(point => ({ ...point, timestamp: new Date() })),
-      rotaPlanejada: createMockRoute(
-        [-23.223684, -44.903103],
-        [-22.906847, -43.172897],
-        20
-      ),
-      distanciaPercorrida: 250,
-      distanciaTotal: 400,
-      horaSaida: new Date(Date.now() - 7200000), // 2 hours ago
-      horaPrevisaoChegada: new Date(Date.now() + 3600000) // 1 hour from now
-    }
+    id: '1',
+    plate: 'ABC-1234',
+    model: 'Volvo FH 460',
+    status: 'active',
+    fuelLevel: 75,
+    lastMaintenance: new Date('2024-01-01'),
   },
   {
-    id: "2",
-    placa: "DEF-5678",
-    motorista: "Maria Santos",
-    modelo: "Scania R450",
-    status: "em_rota",
-    combustivel: 60,
-    velocidade: 75,
-    pedido: {
-      id: "PED002",
-      numero: "PED-2024-002",
-      cliente: "Logistics Pro",
-      status: "em_andamento",
-      tempoPercurso: 90,
-      tempoEstimado: 60
-    },
-    rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -25.428954, lng: -49.267137 }, // Curitiba
-      pontoAtual: { lat: -24.489433, lng: -47.850223 }, // Ponto intermediário
-      historicoPercurso: createMockRoute(
-        [-23.550520, -46.633309],
-        [-24.489433, -47.850223],
-        20
-      ).map(point => ({ ...point, timestamp: new Date() })),
-      rotaPlanejada: createMockRoute(
-        [-24.489433, -47.850223],
-        [-25.428954, -49.267137],
-        20
-      ),
-      distanciaPercorrida: 180,
-      distanciaTotal: 350,
-      horaSaida: new Date(Date.now() - 5400000),
-      horaPrevisaoChegada: new Date(Date.now() + 5400000)
-    }
+    id: '2',
+    plate: 'DEF-5678',
+    model: 'Scania R450',
+    status: 'active',
+    fuelLevel: 60,
+    lastMaintenance: new Date('2024-02-15'),
   },
   {
-    id: "3",
-    placa: "GHI-9012",
-    motorista: "Pedro Oliveira",
-    modelo: "Mercedes-Benz Actros",
-    status: "parado",
-    combustivel: 45,
-    velocidade: 0,
-    pedido: {
-      id: "PED003",
-      numero: "PED-2024-003",
-      cliente: "Fast Delivery",
-      status: "atrasado",
-      tempoPercurso: 150,
-      tempoEstimado: 90
-    },
-    rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -19.917299, lng: -43.934559 }, // Belo Horizonte
-      pontoAtual: { lat: -22.183333, lng: -45.883333 }, // Pouso Alegre
-      historicoPercurso: createMockRoute(
-        [-23.550520, -46.633309],
-        [-22.183333, -45.883333],
-        20
-      ).map(point => ({ ...point, timestamp: new Date() })),
-      rotaPlanejada: createMockRoute(
-        [-22.183333, -45.883333],
-        [-19.917299, -43.934559],
-        20
-      ),
-      distanciaPercorrida: 200,
-      distanciaTotal: 500,
-      horaSaida: new Date(Date.now() - 10800000),
-      horaPrevisaoChegada: new Date(Date.now() + 7200000)
-    }
+    id: '3',
+    plate: 'GHI-9012',
+    model: 'Mercedes Actros',
+    status: 'active',
+    fuelLevel: 85,
+    lastMaintenance: new Date('2024-03-01'),
   },
   {
-    id: "4",
-    placa: "JKL-3456",
-    motorista: "Ana Costa",
-    modelo: "Iveco S-Way",
-    status: "em_rota",
-    combustivel: 85,
-    velocidade: 90,
-    pedido: {
-      id: "PED004",
-      numero: "PED-2024-004",
-      cliente: "Express Cargo",
-      status: "em_andamento",
-      tempoPercurso: 60,
-      tempoEstimado: 30
-    },
-    rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -23.200770, lng: -45.887279 }, // São José dos Campos
-      pontoAtual: { lat: -23.375694, lng: -46.260137 }, // Ponto intermediário
-      historicoPercurso: createMockRoute(
-        [-23.550520, -46.633309],
-        [-23.375694, -46.260137],
-        20
-      ).map(point => ({ ...point, timestamp: new Date() })),
-      rotaPlanejada: createMockRoute(
-        [-23.375694, -46.260137],
-        [-23.200770, -45.887279],
-        20
-      ),
-      distanciaPercorrida: 50,
-      distanciaTotal: 100,
-      horaSaida: new Date(Date.now() - 3600000),
-      horaPrevisaoChegada: new Date(Date.now() + 1800000)
-    }
+    id: '4',
+    plate: 'JKL-3456',
+    model: 'Volvo FH16',
+    status: 'active',
+    fuelLevel: 45,
+    lastMaintenance: new Date('2024-02-28'),
   },
   {
-    id: "5",
-    placa: "MNO-7890",
-    motorista: "Carlos Souza",
-    modelo: "DAF XF",
-    status: "manutencao",
-    combustivel: 30,
-    velocidade: 0,
-    pedido: {
-      id: "PED005",
-      numero: "PED-2024-005",
-      cliente: "Quick Transport",
-      status: "atrasado",
-      tempoPercurso: 180,
-      tempoEstimado: 120
+    id: '5',
+    plate: 'MNO-7890',
+    model: 'Scania S730',
+    status: 'active',
+    fuelLevel: 90,
+    lastMaintenance: new Date('2024-03-10'),
+  },
+];
+
+const mockDrivers: Driver[] = [
+  {
+    id: '1',
+    name: 'João Silva',
+    status: 'on_route',
+    license: 'ABC123456',
+  },
+  {
+    id: '2',
+    name: 'Maria Santos',
+    status: 'on_route',
+    license: 'DEF789012',
+  },
+  {
+    id: '3',
+    name: 'Pedro Oliveira',
+    status: 'on_route',
+    license: 'GHI345678',
+  },
+  {
+    id: '4',
+    name: 'Ana Costa',
+    status: 'on_route',
+    license: 'JKL901234',
+  },
+  {
+    id: '5',
+    name: 'Carlos Souza',
+    status: 'on_route',
+    license: 'MNO567890',
+  },
+];
+
+const mockClients: Client[] = [
+  {
+    id: '1',
+    name: 'Tech Solutions',
+    address: 'Av. Paulista, 1000',
+    coordinates: { lat: -23.550520, lng: -46.633309 }, // São Paulo
+  },
+  {
+    id: '2',
+    name: 'Logistics Pro',
+    address: 'Rua da Consolação, 2000',
+    coordinates: { lat: -23.558, lng: -46.662 }, // São Paulo - Consolação
+  },
+  {
+    id: '3',
+    name: 'Fast Delivery',
+    address: 'Av. Brigadeiro Faria Lima, 3000',
+    coordinates: { lat: -23.567, lng: -46.693 }, // São Paulo - Faria Lima
+  },
+  {
+    id: '4',
+    name: 'Express Cargo',
+    address: 'Av. Rebouças, 1500',
+    coordinates: { lat: -23.573, lng: -46.672 }, // São Paulo - Pinheiros
+  },
+  {
+    id: '5',
+    name: 'Quick Transport',
+    address: 'Av. Berrini, 500',
+    coordinates: { lat: -23.594, lng: -46.687 }, // São Paulo - Berrini
+  },
+];
+
+export const mockRoutes: Route[] = [
+  {
+    id: '1',
+    name: 'Entrega Tech Solutions #1',
+    status: routeStatuses.in_progress,
+    vehicle: mockVehicles[0],
+    driver: mockDrivers[0],
+    client: mockClients[0],
+    origin: {
+      address: 'Centro de Distribuição SP',
+      location: { lat: -23.540, lng: -46.630 },
     },
-    rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -21.785741, lng: -48.175332 }, // Araraquara
-      pontoAtual: { lat: -22.668333, lng: -47.333333 }, // Campinas
-      historicoPercurso: createMockRoute(
-        [-23.550520, -46.633309],
-        [-22.668333, -47.333333],
-        20
-      ).map(point => ({ ...point, timestamp: new Date() })),
-      rotaPlanejada: createMockRoute(
-        [-22.668333, -47.333333],
-        [-21.785741, -48.175332],
-        20
-      ),
-      distanciaPercorrida: 100,
-      distanciaTotal: 300,
-      horaSaida: new Date(Date.now() - 14400000),
-      horaPrevisaoChegada: new Date(Date.now() + 10800000)
-    }
-  }
-]
-
-export const simulateRealTimeUpdate = (truck: TruckData): TruckData => {
-  const now = new Date()
-  const progress = (now.getTime() - truck.rota.horaSaida.getTime()) / 
-    (truck.rota.horaPrevisaoChegada.getTime() - truck.rota.horaSaida.getTime())
-
-  // Update current position based on time progress
-  const newPoint = {
-    lat: truck.rota.origem.lat + (truck.rota.destino.lat - truck.rota.origem.lat) * progress,
-    lng: truck.rota.origem.lng + (truck.rota.destino.lng - truck.rota.origem.lng) * progress
-  }
-
-  return {
-    ...truck,
-    combustivel: Math.max(0, truck.combustivel - Math.random() * 0.5),
-    velocidade: 60 + Math.random() * 40,
-    rota: {
-      ...truck.rota,
-      pontoAtual: newPoint,
-      historicoPercurso: [
-        ...truck.rota.historicoPercurso,
-        { ...newPoint, timestamp: now }
+    destination: {
+      address: 'Tech Solutions - Matriz',
+      location: { lat: -23.550520, lng: -46.633309 },
+    },
+    currentLocation: { lat: -23.545, lng: -46.632 },
+    distance: {
+      total: 100,
+      completed: 75,
+      unit: 'km',
+    },
+    time: {
+      departure: new Date('2024-03-20T08:00:00'),
+      estimated_arrival: new Date('2024-03-20T10:00:00'),
+      duration: 120,
+    },
+    path: {
+      completed: [
+        { lat: -23.540, lng: -46.630 },
+        { lat: -23.545, lng: -46.632 },
       ],
-      distanciaPercorrida: truck.rota.distanciaTotal * progress
-    }
+      remaining: [
+        { lat: -23.548, lng: -46.633 },
+        { lat: -23.550520, lng: -46.633309 },
+      ],
+    },
+  },
+  {
+    id: '2',
+    name: 'Entrega Logistics Pro #1',
+    status: routeStatuses.pending,
+    vehicle: mockVehicles[1],
+    driver: mockDrivers[1],
+    client: mockClients[1],
+    origin: {
+      address: 'Centro de Distribuição SP',
+      location: { lat: -23.540, lng: -46.630 },
+    },
+    destination: {
+      address: 'Logistics Pro - Filial',
+      location: { lat: -23.558, lng: -46.662 },
+    },
+    currentLocation: { lat: -23.540, lng: -46.630 },
+    distance: {
+      total: 80,
+      completed: 0,
+      unit: 'km',
+    },
+    time: {
+      departure: new Date('2024-03-20T09:00:00'),
+      estimated_arrival: new Date('2024-03-20T11:00:00'),
+      duration: 120,
+    },
+    path: {
+      completed: [],
+      remaining: [
+        { lat: -23.540, lng: -46.630 },
+        { lat: -23.558, lng: -46.662 },
+      ],
+    },
+  },
+  {
+    id: '3',
+    name: 'Entrega Fast Delivery #1',
+    status: routeStatuses.in_progress,
+    vehicle: mockVehicles[2],
+    driver: mockDrivers[2],
+    client: mockClients[2],
+    origin: {
+      address: 'Centro de Distribuição SP',
+      location: { lat: -23.540, lng: -46.630 },
+    },
+    destination: {
+      address: 'Fast Delivery - HQ',
+      location: { lat: -23.567, lng: -46.693 },
+    },
+    currentLocation: { lat: -23.555, lng: -46.660 },
+    distance: {
+      total: 120,
+      completed: 60,
+      unit: 'km',
+    },
+    time: {
+      departure: new Date('2024-03-20T07:30:00'),
+      estimated_arrival: new Date('2024-03-20T09:30:00'),
+      duration: 120,
+    },
+    path: {
+      completed: [
+        { lat: -23.540, lng: -46.630 },
+        { lat: -23.555, lng: -46.660 },
+      ],
+      remaining: [
+        { lat: -23.560, lng: -46.675 },
+        { lat: -23.567, lng: -46.693 },
+      ],
+    },
+  },
+  {
+    id: '4',
+    name: 'Entrega Express Cargo #1',
+    status: routeStatuses.completed,
+    vehicle: mockVehicles[3],
+    driver: mockDrivers[3],
+    client: mockClients[3],
+    origin: {
+      address: 'Centro de Distribuição SP',
+      location: { lat: -23.540, lng: -46.630 },
+    },
+    destination: {
+      address: 'Express Cargo - Unidade 1',
+      location: { lat: -23.573, lng: -46.672 },
+    },
+    currentLocation: { lat: -23.573, lng: -46.672 },
+    distance: {
+      total: 90,
+      completed: 90,
+      unit: 'km',
+    },
+    time: {
+      departure: new Date('2024-03-20T06:00:00'),
+      estimated_arrival: new Date('2024-03-20T08:00:00'),
+      duration: 120,
+    },
+    path: {
+      completed: [
+        { lat: -23.540, lng: -46.630 },
+        { lat: -23.555, lng: -46.650 },
+        { lat: -23.573, lng: -46.672 },
+      ],
+      remaining: [],
+    },
+  },
+  {
+    id: '5',
+    name: 'Entrega Quick Transport #1',
+    status: routeStatuses.cancelled,
+    vehicle: mockVehicles[4],
+    driver: mockDrivers[4],
+    client: mockClients[4],
+    origin: {
+      address: 'Centro de Distribuição SP',
+      location: { lat: -23.540, lng: -46.630 },
+    },
+    destination: {
+      address: 'Quick Transport - Matriz',
+      location: { lat: -23.594, lng: -46.687 },
+    },
+    currentLocation: { lat: -23.550, lng: -46.645 },
+    distance: {
+      total: 150,
+      completed: 30,
+      unit: 'km',
+    },
+    time: {
+      departure: new Date('2024-03-20T08:30:00'),
+      estimated_arrival: new Date('2024-03-20T10:30:00'),
+      duration: 120,
+    },
+    path: {
+      completed: [
+        { lat: -23.540, lng: -46.630 },
+        { lat: -23.550, lng: -46.645 },
+      ],
+      remaining: [
+        { lat: -23.570, lng: -46.660 },
+        { lat: -23.594, lng: -46.687 },
+      ],
+    },
+  },
+];
+
+export function simulateRouteUpdate(route: Route): Route {
+  // Simulate movement along the path
+  const newCompletedPath = [...route.path.completed];
+  const newRemainingPath = [...route.path.remaining];
+  
+  if (newRemainingPath.length > 0) {
+    const nextPoint = newRemainingPath.shift()!;
+    newCompletedPath.push(nextPoint);
+    
+    return {
+      ...route,
+      currentLocation: nextPoint,
+      path: {
+        completed: newCompletedPath,
+        remaining: newRemainingPath,
+      },
+      distance: {
+        ...route.distance,
+        completed: route.distance.completed + 1,
+      },
+    };
   }
+  
+  return route;
 } 

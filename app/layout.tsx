@@ -21,15 +21,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={poppins.variable}>
-      <ClerkProvider 
-        appearance={{
-          variables: {colorPrimary: "#000000"},
-          elements: {
-            formButtonPrimary: "bg-black text-white",
-          }
-        }}
-      >
+    <ClerkProvider dynamic>
+      <html lang="pt-BR" className={poppins.variable}>
         <body className="font-poppins">
           <ThemeProvider>
             <SidebarProvider>
@@ -37,7 +30,7 @@ export default function RootLayout({
             </SidebarProvider>
           </ThemeProvider>
       </body>
-      </ClerkProvider>
-    </html>
+      </html>
+    </ClerkProvider>
   )
 }

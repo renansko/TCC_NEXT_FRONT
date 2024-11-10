@@ -1,37 +1,71 @@
 export interface Location {
-  lat: number
-  lng: number
+  lat: number;
+  lng: number;
 }
 
 export interface RoutePoint extends Location {
-  timestamp: Date
+  timestamp: Date;
 }
 
-export interface TruckData {
-  id: string
-  placa: string
-  motorista: string
-  modelo: string
-  status: 'em_rota' | 'parado' | 'manutencao' | 'finalizado'
-  combustivel: number
-  velocidade: number
-  pedido: {
-    id: string
-    numero: string
-    cliente: string
-    status: 'em_andamento' | 'entregue' | 'atrasado'
-    tempoPercurso: number // em minutos
-    tempoEstimado: number // em minutos
-  }
-  rota: {
-    origem: Location
-    destino: Location
-    pontoAtual: Location
-    historicoPercurso: RoutePoint[]
-    rotaPlanejada: Location[]
-    distanciaPercorrida: number // em km
-    distanciaTotal: number // em km
-    horaSaida: Date
-    horaPrevisaoChegada: Date
-  }
+export interface Driver {
+  id: string;
+  name: string;
+  status: 'available' | 'on_route' | 'off_duty';
+  license: string;
+}
+
+export interface Vehicle {
+  id: string;
+  plate: string;
+  model: string;
+  status: 'active' | 'maintenance' | 'inactive';
+  currentDriver?: Driver;
+  fuelLevel: number;
+  lastMaintenance: Date;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  address: string;
+  coordinates: Location;
+}
+
+export interface RouteStatus {
+  code: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  label: string;
+  color: string;
+}
+
+export interface Route {
+  id: string;
+  name: string;
+  status: RouteStatus;
+  vehicle?: Vehicle;
+  driver?: Driver;
+  client: Client;
+  origin: {
+    address: string;
+    location: Location;
+  };
+  destination: {
+    address: string;
+    location: Location;
+  };
+  currentLocation?: Location;
+  distance: {
+    total: number;
+    completed: number;
+    unit: 'km' | 'mi';
+  };
+  time: {
+    departure: Date;
+    estimated_arrival: Date;
+    duration: number;
+  };
+  path: {
+    completed: Location[];
+    remaining: Location[];
+  };
+  googleMapsData?: google.maps.DirectionsResult;
 } 

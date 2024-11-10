@@ -42,7 +42,7 @@ import {
 } from "./sidebar"
 import { Icons } from "../Icons"
 import { Breadcrumbs } from "../breadcrumbs"
-import { useAuth, useUser } from "@clerk/nextjs"
+import { SignOutButton, UserButton, useUser } from "@clerk/nextjs"
 
 
 interface SidebarItem {
@@ -105,7 +105,7 @@ const data: SidebarData = {
 
   function SidebarComponent({children}: {children: React.ReactNode}) {
   const {user} = useUser()
-  const {signOut} = useAuth()
+  
   return (
     <SidebarProvider>
       <Sidebar variant="inset" className="flex-1">
@@ -319,10 +319,12 @@ const data: SidebarData = {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    <Icons.logOut />
-                    Sair
-                  </DropdownMenuItem>
+                  <SignOutButton>
+                    <DropdownMenuItem>
+                      <Icons.logOut />
+                      Sair
+                    </DropdownMenuItem>
+                  </SignOutButton>
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>

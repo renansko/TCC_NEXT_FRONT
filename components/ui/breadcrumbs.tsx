@@ -22,20 +22,19 @@ export function Breadcrumbs() {
   return (
     <Breadcrumb className="flex justify-start items-center">
       <BreadcrumbList>
-        {breadcrumbs.map(({ href, text, isLast, isHome }) => (
-          <BreadcrumbItem key={href} className="hidden md:block">
+        {breadcrumbs.map(({ href, text, isLast, isHome }, index) => (
+          <BreadcrumbItem key={href} className="hidden md:inline-flex items-center">
             {isLast ? (
               <BreadcrumbPage>{text}</BreadcrumbPage>
             ) : isHome ? (
               <Link href="/">
                 <Icons.home />
               </Link>
-
             ) : (
-              <span className="flex items-center gap-1">
+              <>
                 <BreadcrumbLink href={href}>{text}</BreadcrumbLink>
-                <BreadcrumbSeparator />
-              </span>
+                {!isLast && <BreadcrumbSeparator />}
+              </>
             )}
           </BreadcrumbItem>
         ))}

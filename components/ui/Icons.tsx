@@ -34,7 +34,8 @@ import {
   Mail,
   ExternalLink,
   Truck,
-  Home
+  Home,
+  Clock
 } from "lucide-react";
 
 type IconProps = React.HTMLAttributes<SVGElement>
@@ -226,4 +227,5 @@ export const Icons = {
   mail: Mail,
   externalLink: ExternalLink,
   truck: Truck,
+  clock: Clock,
 }
