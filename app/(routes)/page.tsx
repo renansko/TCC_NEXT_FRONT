@@ -1,12 +1,15 @@
-"use client"
+import { Icons } from "@/components/ui/Icons";
 
-import * as React from "react"
-import { Icons } from "@/components/ui/Icons"
-import { RegisterForm } from "../components/register-form"
-import Link from "next/link"
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-export default function RegisterUsuarioPage() {
-  return (
+export default function Page({ children }: { children: React.ReactNode }) {
+ 
+    return (
+    <div className="relative flex gap-3">
+    <SignedIn>
+        {children}
+    </SignedIn>
+    <SignedOut>
     <div className="container relative h-svh flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
         <div className="absolute inset-0 bg-[#D2B48C]" />
@@ -17,27 +20,28 @@ export default function RegisterUsuarioPage() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              Tenha total gestão e controle de suas cargas e mercadorias
+              &ldquo;Bem-vindo à nossa plataforma. Faça login para acessar sua conta.&rdquo;
             </p>
           </blockquote>
         </div>
       </div>
-      <div className="lg:p-8">
-        <Link href="/">
-          <Icons.back />
-        </Link>
-        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <div className="lg:p-8 ">
+        <div className="">
           <div className="flex flex-col space-y-2 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
-              Cadastre-se como Usuário
+              Acesse sua conta
             </h1>
             <p className="text-sm text-muted-foreground">
-              Preencha os dados abaixo para criar sua conta pessoal
+              Digite suas credenciais abaixo para entrar
             </p>
           </div>
-          <RegisterForm type="usuario" />
+          <section className="max-w-md mx-auto">
+            {children}
+          </section>
         </div>
       </div>
     </div>
+    </SignedOut>
+  </div>
   )
-} 
+}

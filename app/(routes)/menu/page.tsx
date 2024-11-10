@@ -14,7 +14,7 @@ const menuItems = [
     description: "Gerencie e acompanhe todos os pedidos",
     icon: "package",
     color: "bg-blue-500/20 text-blue-500",
-    link: "/pedidos",
+    link: "/menu/pedidos",
     stats: [
       { label: "Total", value: 150 },
       { label: "Pendentes", value: 30 },
@@ -25,7 +25,7 @@ const menuItems = [
     description: "Controle sua frota de veículos",
     icon: "truck",
     color: "bg-green-500/20 text-green-500",
-    link: "/veiculos",
+    link: "/menu/veiculos",
     stats: [
       { label: "Total", value: 25 },
       { label: "Ativos", value: 18 },
@@ -36,7 +36,7 @@ const menuItems = [
     description: "Gerencie informações dos clientes",
     icon: "user",
     color: "bg-purple-500/20 text-purple-500",
-    link: "/clientes",
+    link: "/menu/clientes",
     stats: [
       { label: "Total", value: 500 },
       { label: "Novos", value: 50 },
@@ -47,7 +47,7 @@ const menuItems = [
     description: "Acompanhe entregas em tempo real",
     icon: "map",
     color: "bg-red-500/20 text-red-500",
-    link: "/acompanhamentos",
+    link: "/menu/acompanhamentos",
     stats: [
       { label: "Em rota", value: 15 },
       { label: "Concluídos", value: 85 },

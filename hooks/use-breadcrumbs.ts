@@ -7,6 +7,7 @@ interface Breadcrumb {
   href: string;
   text: string;
   isLast: boolean;
+  isHome: boolean;
 }
 
 export function useBreadcrumbs(): Breadcrumb[] {
@@ -26,6 +27,7 @@ export function useBreadcrumbs(): Breadcrumb[] {
     return segments.map((segment, index) => {
       const href = `/${segments.slice(0, index + 1).join('/')}`;
       const isLast = index === segments.length - 1;
+      const isHome = href === "/";
 
       // Format the segment text (capitalize first letter, replace hyphens with spaces)
       const formattedSegment = segment
@@ -36,7 +38,8 @@ export function useBreadcrumbs(): Breadcrumb[] {
       return {
         href,
         text: formattedSegment,
-        isLast
+        isLast,
+        isHome
       };
     });
   }, [pathname]);

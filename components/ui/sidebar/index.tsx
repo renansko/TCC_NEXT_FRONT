@@ -42,6 +42,7 @@ import {
 } from "./sidebar"
 import { Icons } from "../Icons"
 import { Breadcrumbs } from "../breadcrumbs"
+import { useAuth, useUser } from "@clerk/nextjs"
 
 
 interface SidebarItem {
@@ -53,21 +54,12 @@ interface SidebarItem {
 }
 
 interface SidebarData {
-    user: {
-        name: string
-        email: string
-        avatar: string
-    }
     navMain: SidebarItem[]
     navSecondary: SidebarItem[]
 }
 
 const data: SidebarData = {
-  user: {
-    name: "teste",
-    email: "teste@example.com",
-    avatar: "avatars/shadcn.jpg",
-  },
+
   navMain: [
     {
         title: "Dashboard",
@@ -77,23 +69,23 @@ const data: SidebarData = {
     },
     {
       title: "Pedidos",
-      url: "/pedidos",
+      url: "/menu/pedidos",
       icon: "squareTerminal",
       isActive: true,
     },
     {
       title: "Veículos",
-      url: "/veiculos",
+      url: "/menu/veiculos",
       icon: "bot",
     },
     {
       title: "Clientes",
-      url: "/clientes",
+      url: "/menu/clientes",
       icon: "bookOpen",
     },
     {
       title: "Acompanhamentos",
-      url: "/acompanhamentos",
+      url: "/menu/acompanhamentos",
       icon: "settings2",
     },
   ],
@@ -112,6 +104,8 @@ const data: SidebarData = {
 }
 
   function SidebarComponent({children}: {children: React.ReactNode}) {
+  const {user} = useUser()
+  const {signOut} = useAuth()
   return (
     <SidebarProvider>
       <Sidebar variant="inset" className="flex-1">
@@ -259,17 +253,17 @@ const data: SidebarData = {
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={data.user.avatar}
-                        alt={data.user.name}
+                        src={user?.imageUrl}
+                        alt={user?.fullName ?? ""}
                       />
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {data.user.name}
+                        {user?.fullName}
                       </span>
                       <span className="truncate text-xs">
-                        {data.user.email}
+                        {user?.emailAddresses[0].emailAddress}
                       </span>
                     </div>
                     <Icons.chevronsUpDown className="ml-auto size-4" />
@@ -285,19 +279,19 @@ const data: SidebarData = {
                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                       <Avatar className="h-8 w-8 rounded-lg">
                         <AvatarImage
-                          src={data.user.avatar}
-                          alt={data.user.name}
+                          src={user?.imageUrl}
+                          alt={user?.fullName ?? ""}
                         />
                         <AvatarFallback className="rounded-lg">
-                          {data.user.name.charAt(0)}
+                          {user?.fullName?.charAt(0) ?? ""}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                          {data.user.name}
+                          {user?.fullName ?? ""}
                         </span>
                         <span className="truncate text-xs">
-                          {data.user.email}
+                          {user?.emailAddresses[0].emailAddress ?? ""}
                         </span>
                       </div>
                     </div>
@@ -325,7 +319,7 @@ const data: SidebarData = {
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()}>
                     <Icons.logOut />
                     Sair
                   </DropdownMenuItem>

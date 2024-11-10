@@ -19,9 +19,9 @@ import { useVehicles } from "./hooks/use-vehicles";
 import type { Vehicle, VehicleFormData } from "./types";
 
 // Import your mock data
-import fordK from "../../public/FordK.jpeg";
-import gol from "../../public/Gol.jpeg";
-import uno from "../../public/Uno.jpg";
+import fordK from "../../../public/FordK.jpeg"
+import gol from "../../../public/Gol.jpeg";
+import uno from "../../../public/Uno.jpg";
 
 export default function VeiculosPage() {
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);

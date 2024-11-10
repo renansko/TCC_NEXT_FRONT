@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Icons } from "@/components/ui/Icons"
-import type { OrderItemFormData } from "@/app/(routes)/pedidos/types"
+import type { OrderItemFormData } from "@/app/(routes)/menu/pedidos/types"
 
 interface OrderItemListProps {
   items: OrderItemFormData[]

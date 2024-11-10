@@ -1,4 +1,3 @@
-import ProtectedRoute from "@/app/auth/protected-route"
 import 'leaflet/dist/leaflet.css'
 
 export default function AcompanhamentoLayout({
@@ -6,5 +5,5 @@ export default function AcompanhamentoLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <ProtectedRoute>{children}</ProtectedRoute>
+  return <>{children}</>
 } 

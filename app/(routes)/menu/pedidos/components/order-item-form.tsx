@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { DialogClose } from "@/components/ui/dialog"
-import { orderItemSchema } from "@/app/(routes)/pedidos/schemas"
-import type { OrderItemFormData } from "@/app/(routes)/pedidos/types"
+import { orderItemSchema } from "@/app/(routes)/menu/pedidos/schemas"
+import type { OrderItemFormData } from "@/app/(routes)/menu/pedidos/types"
 
 interface OrderItemFormProps {
   onSubmit: (data: OrderItemFormData) => void

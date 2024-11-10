@@ -13,8 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { DialogClose } from "@/components/ui/dialog"
-import { orderSchema } from "@/app/(routes)/pedidos/schemas"
-    import type { OrderFormData } from "@/app/(routes)/pedidos/types"
+import { orderSchema } from "@/app/(routes)/menu/pedidos/schemas"
+    import type { OrderFormData } from "@/app/(routes)/menu/pedidos/types"
 import { Icons } from "@/components/ui/Icons"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
