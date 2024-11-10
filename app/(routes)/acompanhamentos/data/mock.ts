@@ -34,8 +34,8 @@ export const mockTrucks: TruckData[] = [
       tempoEstimado: 45
     },
     rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -22.906847, lng: -43.172897 }, // Rio de Janeiro
+      origem: 'São paulo', // São Paulo
+      destino: 'Rio de janeiro', // Rio de Janeiro
       pontoAtual: { lat: -23.223684, lng: -44.903103 }, // Ponto intermediário
       historicoPercurso: createMockRoute(
         [-23.550520, -46.633309],
@@ -70,8 +70,8 @@ export const mockTrucks: TruckData[] = [
       tempoEstimado: 60
     },
     rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -25.428954, lng: -49.267137 }, // Curitiba
+      origem: 'São paulo', // São Paulo
+      destino: 'Rio de janeiro', // Curitiba
       pontoAtual: { lat: -24.489433, lng: -47.850223 }, // Ponto intermediário
       historicoPercurso: createMockRoute(
         [-23.550520, -46.633309],
@@ -106,8 +106,8 @@ export const mockTrucks: TruckData[] = [
       tempoEstimado: 90
     },
     rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -19.917299, lng: -43.934559 }, // Belo Horizonte
+      origem: 'São paulo', // São Paulo
+      destino: 'Belo horizonte', // Belo Horizonte
       pontoAtual: { lat: -22.183333, lng: -45.883333 }, // Pouso Alegre
       historicoPercurso: createMockRoute(
         [-23.550520, -46.633309],
@@ -142,8 +142,8 @@ export const mockTrucks: TruckData[] = [
       tempoEstimado: 30
     },
     rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -23.200770, lng: -45.887279 }, // São José dos Campos
+      origem: 'São paulo', // São Paulo
+      destino: 'São jose dos campos', // São José dos Campos
       pontoAtual: { lat: -23.375694, lng: -46.260137 }, // Ponto intermediário
       historicoPercurso: createMockRoute(
         [-23.550520, -46.633309],
@@ -178,8 +178,8 @@ export const mockTrucks: TruckData[] = [
       tempoEstimado: 120
     },
     rota: {
-      origem: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-      destino: { lat: -21.785741, lng: -48.175332 }, // Araraquara
+      origem: 'São paulo', // São Paulo
+      destino: 'Araraquara', // Araraquara
       pontoAtual: { lat: -22.668333, lng: -47.333333 }, // Campinas
       historicoPercurso: createMockRoute(
         [-23.550520, -46.633309],
@@ -205,10 +205,10 @@ export const simulateRealTimeUpdate = (truck: TruckData): TruckData => {
     (truck.rota.horaPrevisaoChegada.getTime() - truck.rota.horaSaida.getTime())
 
   // Update current position based on time progress
-  const newPoint = {
-    lat: truck.rota.origem.lat + (truck.rota.destino.lat - truck.rota.origem.lat) * progress,
-    lng: truck.rota.origem.lng + (truck.rota.destino.lng - truck.rota.origem.lng) * progress
-  }
+  // const newPoint = {
+  //   lat: truck.rota.origem.lat + (truck.rota.destino.lat - truck.rota.origem.lat) * progress,
+  //   lng: truck.rota.origem.lng + (truck.rota.destino.lng - truck.rota.origem.lng) * progress
+  // }
 
   return {
     ...truck,
@@ -216,10 +216,10 @@ export const simulateRealTimeUpdate = (truck: TruckData): TruckData => {
     velocidade: 60 + Math.random() * 40,
     rota: {
       ...truck.rota,
-      pontoAtual: newPoint,
+      //pontoAtual: newPoint,
       historicoPercurso: [
         ...truck.rota.historicoPercurso,
-        { ...newPoint, timestamp: now }
+        //{ ...newPoint, timestamp: now }
       ],
       distanciaPercorrida: truck.rota.distanciaTotal * progress
     }
