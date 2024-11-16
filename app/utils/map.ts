@@ -94,9 +94,9 @@ export class Map {
 
   async addRoute(routeOptions: {
     routeId: string;
-    startMarkerOptions: google.maps.MarkerOptions;
-    endMarkerOptions: google.maps.MarkerOptions;
-    carMarkerOptions: google.maps.MarkerOptions;
+    startMarkerOptions: google.maps.Marker;
+    endMarkerOptions: google.maps.Marker;
+    carMarkerOptions: google.maps.Marker;
     directionsResponseData?: DirectionsResponseData & { request: any };
   }) {
     if (routeOptions.routeId in this.routes) {
@@ -120,9 +120,9 @@ export class Map {
 
   async addRouteWithIcons(routeOptions: {
     routeId: string;
-    startMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
-    endMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
-    carMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    startMarkerOptions: Omit<google.maps.Marker, "icon">;
+    endMarkerOptions: Omit<google.maps.Marker, "icon">;
+    carMarkerOptions: Omit<google.maps.Marker, "icon">;
     directionsResponseData?: DirectionsResponseData & { request: any };
   }) {
     const color = sample(shuffle(colors)) as string;
