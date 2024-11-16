@@ -96,6 +96,16 @@ const data: SidebarData = {
       url: "/acompanhamentos",
       icon: "settings2",
     },
+    {
+      title: "Administração",
+      url: "/admin",
+      icon: "settings2",
+    },
+    {
+      title: "Nova Rota",
+      url: "/new-route",
+      icon: "settings2",
+    }
   ],
   navSecondary: [
     {
