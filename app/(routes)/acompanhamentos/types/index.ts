@@ -24,8 +24,8 @@ export interface TruckData {
     tempoEstimado: number // em minutos
   }
   rota: {
-    origem: Location
-    destino: Location
+    origem: string
+    destino: string
     pontoAtual: Location
     historicoPercurso: RoutePoint[]
     rotaPlanejada: Location[]

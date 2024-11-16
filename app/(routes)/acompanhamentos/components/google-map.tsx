@@ -1,28 +1,27 @@
 'use client';
 
 import {  FormEvent, useRef, useState } from 'react';
-import { useMap } from '../hooks/useMap';
 import type { DirectionsResponseData, FindPlaceFromTextResponseData } from '@googlemaps/google-maps-services-js';
+import { useMap } from '@/app/hooks/useMap';
+import { TruckData } from '../types';
 
-export function NewRoutePage(){
+interface GoogleMapProps {
+    truck: TruckData
+  }
+
+export function GoogleMap({truck}: GoogleMapProps){
     const mapContainerRef = useRef<HTMLDivElement>(null)
     const map = useMap(mapContainerRef)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [directionsResponseData, setDirectionsResponseData] = useState<DirectionsResponseData & {request: any}>()
 
     async function searchPlaces(event: FormEvent){
         event.preventDefault();
-        const source = document.querySelector<HTMLInputElement>(
-          "input[name=source_place]"
-        )?.value;
-        const destination = document.querySelector<HTMLInputElement>(
-          "input[name=destination_place]"
-        )?.value;
-    
+
         const [sourceResponse, destinationResponse] = await Promise.all([
-            fetch(`http://localhost:3000/places?text=${source}`),
-            fetch(`http://localhost:3000/places?text=${destination}`),
+            fetch(`http://localhost:3000/places?text=${truck.rota.origem}`),
+            fetch(`http://localhost:3000/places?text=${truck.rota.destino}`),
           ]);
-          console.log(destinationResponse)
       
           const [sourcePlace, destinationPlace]: FindPlaceFromTextResponseData[] =
             await Promise.all([sourceResponse.json(), destinationResponse.json()]);
@@ -79,7 +78,7 @@ export function NewRoutePage(){
             destination_id: directionsResponseData?.request.destination.place_id,
           }),
         });
-
+        console.log(response)
         const route = await response.json();
         console.log(route)
 
@@ -120,8 +119,6 @@ export function NewRoutePage(){
             <div>
                 <h1>Nova rota</h1>
                  <form className="flex flex-col" onSubmit={searchPlaces}>
-                    <input name="source_place" placeholder="origem" />
-                    <input name="destination_place" placeholder="destino" />
                     <button type="submit">Pesquisar</button>
                 </form>
                 {directionsResponseData && (
@@ -157,6 +154,6 @@ export function NewRoutePage(){
     )
 }
 
-export default NewRoutePage;
+export default GoogleMap;
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

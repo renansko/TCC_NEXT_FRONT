@@ -3,7 +3,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { AuthProvider } from "./contexts/auth-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 
 const poppins = Poppins({
   subsets: ["latin"],
