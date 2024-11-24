@@ -29,6 +29,7 @@ export const initialMapState: MapState = {
   error: null,
   map: null,
   refresh: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   setSelectedRouteInfo: (routeInfo: Route | null) => {},
 };
 

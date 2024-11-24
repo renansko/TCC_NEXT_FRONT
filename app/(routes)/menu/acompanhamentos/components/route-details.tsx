@@ -1,9 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, User, MapPin, Clock, X } from "lucide-react";
-import type { Route } from "../types";
-import { format } from "date-fns";
+import { Truck, MapPin, Clock} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,

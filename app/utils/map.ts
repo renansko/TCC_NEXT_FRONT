@@ -1,5 +1,5 @@
 import { sample, shuffle } from "lodash";
-import type { DirectionsResponseData } from "@googlemaps/google-maps-services-js";
+import type { DirectionsRequest, DirectionsResponseData } from "@googlemaps/google-maps-services-js";
 
 export class Map {
   public map: google.maps.Map;
@@ -94,10 +94,10 @@ export class Map {
 
   async addRoute(routeOptions: {
     routeId: string;
-    startMarkerOptions: google.maps.Marker;
-    endMarkerOptions: google.maps.Marker;
-    carMarkerOptions: google.maps.Marker;
-    directionsResponseData?: DirectionsResponseData & { request: any };
+    startMarkerOptions: google.maps.MarkerOptions;
+    endMarkerOptions: google.maps.MarkerOptions;
+    carMarkerOptions: google.maps.MarkerOptions;
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest };
   }) {
     if (routeOptions.routeId in this.routes) {
       throw new RouteExistsError();
@@ -120,10 +120,10 @@ export class Map {
 
   async addRouteWithIcons(routeOptions: {
     routeId: string;
-    startMarkerOptions: Omit<google.maps.Marker, "icon">;
-    endMarkerOptions: Omit<google.maps.Marker, "icon">;
-    carMarkerOptions: Omit<google.maps.Marker, "icon">;
-    directionsResponseData?: DirectionsResponseData & { request: any };
+    startMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    endMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    carMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest };
   }) {
     const color = sample(shuffle(colors)) as string;
     return this.addRoute({
@@ -216,7 +216,7 @@ export class Route {
   }
 
   async calculateRoute(
-    directionsResponseData?: DirectionsResponseData & { request: any }
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest }
   ) {
     if (directionsResponseData) {
       const directionsResult = convertDirectionsResponseToDirectionsResult(
@@ -285,7 +285,7 @@ const colors = [
 ];
 
 function convertDirectionsResponseToDirectionsResult(
-  directionsResponse: DirectionsResponseData & { request: any }
+  directionsResponse: DirectionsResponseData & { request: DirectionsRequest }
 ): google.maps.DirectionsResult {
   const copy = { ...directionsResponse };
 
@@ -294,8 +294,12 @@ function convertDirectionsResponseToDirectionsResult(
       copy.available_travel_modes as google.maps.TravelMode[],
     geocoded_waypoints: copy.geocoded_waypoints,
     status: copy.status,
-    request: copy.request,
-    //@ts-expect-error
+    request: {
+      ...copy.request,
+      destination: new google.maps.LatLng(copy.request.data.destination.lat, copy.request.data.destination.lng),
+      origin: new google.maps.LatLng(copy.request.data.origin.lat, copy.request.data.origin.lng),
+      travelMode: google.maps.TravelMode.DRIVING,
+    },
     routes: copy.routes.map((route) => {
       const bounds = new google.maps.LatLngBounds(
         route.bounds.southwest,
@@ -323,6 +327,7 @@ function convertDirectionsResponseToDirectionsResult(
             leg.end_location.lng
           ),
           steps: leg.steps.map((step) => ({
+            ...step,
             path: google.maps.geometry.encoding.decodePath(
               step.polyline.points
             ),
@@ -330,7 +335,14 @@ function convertDirectionsResponseToDirectionsResult(
               step.start_location.lat,
               step.start_location.lng
             ),
+            end_location: new google.maps.LatLng(
+              step.end_location.lat,
+              step.end_location.lng
+            ),
           })),
+          traffic_speed_entry: [],
+          via_waypoints: [],
+          duration_in_traffic: leg.duration,
         })),
       };
     }),

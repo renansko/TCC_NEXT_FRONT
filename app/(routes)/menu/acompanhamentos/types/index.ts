@@ -30,7 +30,7 @@ export interface Route {
   distance: number;
   duration: number;
   currentLocation?: Location;
-  directions?: DirectionsResponseData & { request: any };
+  directions?: DirectionsResponseData & { request: Request };
   created_at: Date;
   updated_at: Date;
 }

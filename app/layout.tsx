@@ -3,7 +3,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ClerkProvider } from "@clerk/nextjs";
-import { MapProvider } from "./(routes)/menu/acompanhamentos/contexts/map-context";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,7 +32,7 @@ export default function RootLayout({
         }
       }}
     >
-      <html lang="pt-BR" >
+      <html lang="pt-BR" className={poppins.variable}>
         <body >
           <ThemeProvider>
             <SidebarProvider>

@@ -3,7 +3,6 @@
 import { useState, useCallback, Suspense, useRef, useEffect } from 'react';
 import { RouteDetails } from './components/route-details';
 import { RouteMap } from './components/route-map';
-import { NewRouteModal } from './components/new-route-modal';
 import { Button } from '@/components/ui/button';
 import { Plus, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -11,7 +10,8 @@ import { ErrorAlert } from '@/components/ui/errors/ErrorAlert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useMap } from './contexts/map-context';
 import type { Route } from './types';
-import { Card, CardTitle, CardDescription, CardHeader, CardFooter } from '@/components/ui/card';
+import { Card,CardHeader } from '@/components/ui/card';
+import { NewRouteModal } from './components/new-route-modal';
 
 interface RouteMapContainerProps {
   selectedRoute: Route | null;
@@ -126,12 +126,17 @@ export default function AcompanhamentoPage() {
           />
         </div>
       </div>
+      <NewRouteModal 
+        open={showNewRouteModal}
+        onOpenChange={setShowNewRouteModal}
+        onRouteCreated={() => {}}
+      />
     </div>
   );
 }
 const RouteList = ({ routes }: { routes: Route[] }) => {
-  if (!routes.length) return null;
   const { mapActions: { selectRouteInfo }} = useMap();
+  if (!routes.length) return null;
   const destination = routes[0].destination.name.split(',')[0];
   const source = routes[0].source.name.split(',')[0];
   

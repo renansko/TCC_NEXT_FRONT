@@ -12,7 +12,7 @@ export class MapsService {
     return response.json();
   }
 
-  static async getDirections(originId: string, destinationId: string): Promise<DirectionsResponseData & {request: any}> {
+  static async getDirections(originId: string, destinationId: string): Promise<DirectionsResponseData & {request: Request}> {
     const queryParams = new URLSearchParams({
       originId,
       destinationId,

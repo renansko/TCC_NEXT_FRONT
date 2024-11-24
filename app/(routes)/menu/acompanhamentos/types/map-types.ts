@@ -1,5 +1,5 @@
 import { DirectionsResponseData } from "@googlemaps/google-maps-services-js";
-import { Route, Location } from "../types";
+import { Route } from "../types";
 
 export interface MarkerOptions extends google.maps.MarkerOptions {
   position: google.maps.LatLngLiteral;
@@ -10,7 +10,7 @@ export interface AddRouteWithIconsOptions {
   startMarkerOptions: MarkerOptions;
   endMarkerOptions: MarkerOptions;
   carMarkerOptions: MarkerOptions;
-  directionsResponseData: DirectionsResponseData & { request: any };
+  directionsResponseData: DirectionsResponseData & { request: Request };
 }
 
 

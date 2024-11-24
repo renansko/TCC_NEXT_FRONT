@@ -26,7 +26,7 @@ export function NewRouteModal({ open, onOpenChange, onRouteCreated }: NewRouteMo
   async function geocodeAddress(address: string): Promise<Location> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+    console.log(address);
     // Return mock coordinates around São Paulo
     const baseLocation = { lat: -23.550520, lng: -46.633309 };
     return {
