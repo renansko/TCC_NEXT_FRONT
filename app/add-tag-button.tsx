@@ -1,13 +1,14 @@
-'use client'
+"use client";
 
-import { useFormStatus } from "react-dom"
+import { useFormStatus } from "react-dom";
 
-export function AddTagButton(){
-    const {pending} = useFormStatus()
-    
-        return (
-            <button type="submit" disabled={pending}>
-    {pending ? 'Carregando...' : 'Salvar tag'} {/* Adicionando reticências para indicar carregamento */}
-</button>
-        )
+export function AddTagButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button type="submit" disabled={pending}>
+      {pending ? "Carregando..." : "Salvar tag"}{" "}
+      {/* Adicionando reticências para indicar carregamento */}
+    </button>
+  );
 }

@@ -1,8 +1,9 @@
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
-import { AuthProvider } from "./contexts/auth-context";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { ClerkProvider } from "@clerk/nextjs";
+import { MapProvider } from "./(routes)/menu/acompanhamentos/contexts/map-context";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,16 +22,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={poppins.variable}>
-      <body className="font-poppins">
-        <AuthProvider>
+    <ClerkProvider
+      telemetry={false}
+      dynamic
+      appearance={{
+        variables: { colorPrimary: '#D2B48C' },
+        elements: {
+          formButtonPrimary: 
+            "bg-[#D2B48C] hover:bg-[#C4A484] text-sm normal-case",
+        }
+      }}
+    >
+      <html lang="pt-BR" >
+        <body >
           <ThemeProvider>
             <SidebarProvider>
-              {children}
+                {children}
             </SidebarProvider>
           </ThemeProvider>
-        </AuthProvider>
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -25,10 +25,10 @@ export function Breadcrumbs() {
             {isLast ? (
               <BreadcrumbPage>{text}</BreadcrumbPage>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <BreadcrumbLink href={href}>{text}</BreadcrumbLink>
                 <BreadcrumbSeparator />
-              </>
+              </div>
             )}
           </BreadcrumbItem>
         ))}
