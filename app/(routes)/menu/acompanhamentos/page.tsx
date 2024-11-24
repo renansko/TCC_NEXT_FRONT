@@ -87,10 +87,10 @@ export default function AcompanhamentoPage() {
     setShowNewRouteModal(true);
   }, []);
 
-  const handleRouteCreated = useCallback(() => {
-    setShowNewRouteModal(false);
-    refresh();
-  }, [refresh]);
+  // const handleRouteCreated = useCallback(() => {
+  //   setShowNewRouteModal(false);
+  //   refresh();
+  // }, [refresh]);
 
   if (isLoading) {
     return (
