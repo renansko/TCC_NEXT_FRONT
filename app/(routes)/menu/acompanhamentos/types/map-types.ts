@@ -15,8 +15,6 @@ export interface AddRouteWithIconsOptions {
 
 
 export interface MapContextValue {
-  map: google.maps.Map | null;
-  isLoading: boolean;
   addRoute: (route: Route) => void;
   removeRoute: (routeId: string) => void;
   updateRoutePosition: (routeId: string, position: google.maps.LatLngLiteral) => void;
@@ -26,4 +24,5 @@ export interface MapContextValue {
   refresh: () => void;
   selectRouteInfo: (routeInfo: Route) => void;
   initializeMap: (mapDiv: HTMLDivElement) => void;
+  clearMapElements: () => void;
 } 

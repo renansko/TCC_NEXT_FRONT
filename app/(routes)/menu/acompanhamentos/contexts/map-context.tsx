@@ -188,10 +188,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
   };
 
   const mapActions: MapContextValue = {
-    map: mapRef.current,
-    isLoading: state.isLoading,
     addRoute,
     removeRoute,
+    initializeMap,
     updateRoutePosition: (routeId, position) => {
       const marker = markersRef.current.get(routeId);
       if (marker) {
@@ -225,7 +224,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     selectRouteInfo: (routeInfo: Route) => {
       dispatch({ type: "SET_SELECTED_ROUTE_INFO", payload: routeInfo });
     },
-    initializeMap,
+    clearMapElements,
   };
 
   return (

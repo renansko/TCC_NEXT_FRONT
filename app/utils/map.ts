@@ -289,62 +289,93 @@ function convertDirectionsResponseToDirectionsResult(
 ): google.maps.DirectionsResult {
   const copy = { ...directionsResponse };
 
+  const routes = copy.routes.map((route) => {
+    const bounds = new google.maps.LatLngBounds(
+      route.bounds.southwest,
+      route.bounds.northeast
+    );
+
+    const legs = route.legs.map((leg) => {
+      const steps = leg.steps.map((step) => {
+        const decodedPath = google.maps.geometry.encoding.decodePath(
+          step.polyline.points
+        );
+        
+        return {
+          distance: step.distance,
+          duration: step.duration,
+          end_location: new google.maps.LatLng(
+            step.end_location.lat,
+            step.end_location.lng
+          ),
+          start_location: new google.maps.LatLng(
+            step.start_location.lat,
+            step.start_location.lng
+          ),
+          html_instructions: step.html_instructions,
+          maneuver: step.maneuver,
+          travel_mode: step.travel_mode,
+          encoded_lat_lngs: step.polyline.points,
+          path: decodedPath,
+          lat_lngs: decodedPath,
+          instructions: step.html_instructions,
+          start_point: new google.maps.LatLng(
+            step.start_location.lat,
+            step.start_location.lng
+          ),
+          end_point: new google.maps.LatLng(
+            step.end_location.lat,
+            step.end_location.lng
+          ),
+        } as unknown as google.maps.DirectionsStep;
+      });
+
+      return {
+        ...leg,
+        start_location: new google.maps.LatLng(
+          leg.start_location.lat,
+          leg.start_location.lng
+        ),
+        end_location: new google.maps.LatLng(
+          leg.end_location.lat,
+          leg.end_location.lng
+        ),
+        steps,
+        via_waypoints: [],
+        traffic_speed_entry: [],
+      } as unknown as google.maps.DirectionsLeg;
+    });
+
+    return {
+      bounds,
+      legs,
+      overview_path: google.maps.geometry.encoding.decodePath(
+        route.overview_polyline.points
+      ),
+      overview_polyline: route.overview_polyline,
+      warnings: route.warnings,
+      waypoint_order: route.waypoint_order,
+      summary: route.summary,
+      copyrights: route.copyrights,
+    } as unknown as google.maps.DirectionsRoute;
+  });
+
   return {
-    available_travel_modes:
-      copy.available_travel_modes as google.maps.TravelMode[],
-    geocoded_waypoints: copy.geocoded_waypoints,
+    routes,
     status: copy.status,
+    available_travel_modes: copy.available_travel_modes as google.maps.TravelMode[],
+    geocoded_waypoints: copy.geocoded_waypoints,
     request: {
       ...copy.request,
-      destination: new google.maps.LatLng(copy.request.data.destination.lat, copy.request.data.destination.lng),
-      origin: new google.maps.LatLng(copy.request.data.origin.lat, copy.request.data.origin.lng),
+      destination: new google.maps.LatLng(
+        copy.request.data.destination.lat,
+        copy.request.data.destination.lng
+      ),
+      origin: new google.maps.LatLng(
+        copy.request.data.origin.lat,
+        copy.request.data.origin.lng
+      ),
       travelMode: google.maps.TravelMode.DRIVING,
     },
-    routes: copy.routes.map((route) => {
-      const bounds = new google.maps.LatLngBounds(
-        route.bounds.southwest,
-        route.bounds.northeast
-      );
-      return {
-        bounds,
-        overview_path: google.maps.geometry.encoding.decodePath(
-          route.overview_polyline.points
-        ),
-        overview_polyline: route.overview_polyline,
-        warnings: route.warnings,
-        copyrights: route.copyrights,
-        summary: route.summary,
-        waypoint_order: route.waypoint_order,
-        fare: route.fare,
-        legs: route.legs.map((leg) => ({
-          ...leg,
-          start_location: new google.maps.LatLng(
-            leg.start_location.lat,
-            leg.start_location.lng
-          ),
-          end_location: new google.maps.LatLng(
-            leg.end_location.lat,
-            leg.end_location.lng
-          ),
-          steps: leg.steps.map((step) => ({
-            ...step,
-            path: google.maps.geometry.encoding.decodePath(
-              step.polyline.points
-            ),
-            start_location: new google.maps.LatLng(
-              step.start_location.lat,
-              step.start_location.lng
-            ),
-            end_location: new google.maps.LatLng(
-              step.end_location.lat,
-              step.end_location.lng
-            ),
-          })),
-          traffic_speed_entry: [],
-          via_waypoints: [],
-          duration_in_traffic: leg.duration,
-        })),
-      };
-    }),
-  };
+  } as google.maps.DirectionsResult;
 }

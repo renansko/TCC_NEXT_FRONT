@@ -7,8 +7,6 @@ export interface MapState {
   isLoading: boolean;
   error: Error | null;
   map: google.maps.Map | null;
-  refresh: () => void;
-  setSelectedRouteInfo: (routeInfo: Route | null) => void;
 }
 
 export type MapAction = 
@@ -28,9 +26,6 @@ export const initialMapState: MapState = {
   isLoading: false,
   error: null,
   map: null,
-  refresh: () => {},
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  setSelectedRouteInfo: (routeInfo: Route | null) => {},
 };
 
 export function mapReducer(state: MapState, action: MapAction): MapState {
