@@ -42,7 +42,7 @@ import {
 } from "./sidebar"
 import { Icons } from "../Icons"
 import { Breadcrumbs } from "../breadcrumbs"
-import { SignOutButton, UserButton, useUser } from "@clerk/nextjs"
+import { SignOutButton, useUser } from "@clerk/nextjs"
 
 
 interface SidebarItem {
@@ -130,7 +130,9 @@ const data: SidebarData = {
           <SidebarGroup>
             <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
             <SidebarMenu>
-              {data.navMain.map((item) => (
+              {data.navMain.map((item) => {
+                 const IconComponent = Icons[item.icon];
+                return (
                 <Collapsible
                   key={item.title}
                   asChild
@@ -139,10 +141,7 @@ const data: SidebarData = {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild tooltip={item.title}>
                       <a href={item.url}>
-                        {(() => {
-                          const IconComponent = Icons[item.icon];
-                          return <IconComponent />;
-                        })()}
+                        <IconComponent />
                         <span>{item.title}</span>
                       </a>
                     </SidebarMenuButton>
@@ -171,7 +170,7 @@ const data: SidebarData = {
                     ) : null}
                   </SidebarMenuItem>
                 </Collapsible>
-              ))}
+              )})}
             </SidebarMenu>
           </SidebarGroup>
           {/* <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -225,19 +224,18 @@ const data: SidebarData = {
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
               <SidebarMenu>
-                {data.navSecondary.map((item) => (
+                {data.navSecondary.map((item) => {
+                  const IconComponent = Icons[item.icon];
+                  return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild size="sm">
                       <a href={item.url}>
-                        {(() => {
-                          const IconComponent = Icons[item.icon];
-                          return <IconComponent />;
-                        })()}
+                        <IconComponent /> 
                         <span>{item.title}</span>
                       </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                  )})}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
