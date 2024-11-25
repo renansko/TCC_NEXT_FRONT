@@ -1,5 +1,5 @@
 import { sample, shuffle } from "lodash";
-import type { DirectionsResponseData } from "@googlemaps/google-maps-services-js";
+import type { DirectionsRequest, DirectionsResponseData } from "@googlemaps/google-maps-services-js";
 
 export class Map {
   public map: google.maps.Map;
@@ -94,10 +94,10 @@ export class Map {
 
   async addRoute(routeOptions: {
     routeId: string;
-    startMarkerOptions: google.maps.Marker;
-    endMarkerOptions: google.maps.Marker;
-    carMarkerOptions: google.maps.Marker;
-    directionsResponseData?: DirectionsResponseData & { request: any };
+    startMarkerOptions: google.maps.MarkerOptions;
+    endMarkerOptions: google.maps.MarkerOptions;
+    carMarkerOptions: google.maps.MarkerOptions;
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest };
   }) {
     if (routeOptions.routeId in this.routes) {
       throw new RouteExistsError();
@@ -120,10 +120,10 @@ export class Map {
 
   async addRouteWithIcons(routeOptions: {
     routeId: string;
-    startMarkerOptions: Omit<google.maps.Marker, "icon">;
-    endMarkerOptions: Omit<google.maps.Marker, "icon">;
-    carMarkerOptions: Omit<google.maps.Marker, "icon">;
-    directionsResponseData?: DirectionsResponseData & { request: any };
+    startMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    endMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    carMarkerOptions: Omit<google.maps.MarkerOptions, "icon">;
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest };
   }) {
     const color = sample(shuffle(colors)) as string;
     return this.addRoute({
@@ -216,7 +216,7 @@ export class Route {
   }
 
   async calculateRoute(
-    directionsResponseData?: DirectionsResponseData & { request: any }
+    directionsResponseData?: DirectionsResponseData & { request: DirectionsRequest }
   ) {
     if (directionsResponseData) {
       const directionsResult = convertDirectionsResponseToDirectionsResult(
@@ -285,54 +285,97 @@ const colors = [
 ];
 
 function convertDirectionsResponseToDirectionsResult(
-  directionsResponse: DirectionsResponseData & { request: any }
+  directionsResponse: DirectionsResponseData & { request: DirectionsRequest }
 ): google.maps.DirectionsResult {
   const copy = { ...directionsResponse };
 
-  return {
-    available_travel_modes:
-      copy.available_travel_modes as google.maps.TravelMode[],
-    geocoded_waypoints: copy.geocoded_waypoints,
-    status: copy.status,
-    request: copy.request,
-    //@ts-expect-error
-    routes: copy.routes.map((route) => {
-      const bounds = new google.maps.LatLngBounds(
-        route.bounds.southwest,
-        route.bounds.northeast
-      );
-      return {
-        bounds,
-        overview_path: google.maps.geometry.encoding.decodePath(
-          route.overview_polyline.points
-        ),
-        overview_polyline: route.overview_polyline,
-        warnings: route.warnings,
-        copyrights: route.copyrights,
-        summary: route.summary,
-        waypoint_order: route.waypoint_order,
-        fare: route.fare,
-        legs: route.legs.map((leg) => ({
-          ...leg,
-          start_location: new google.maps.LatLng(
-            leg.start_location.lat,
-            leg.start_location.lng
-          ),
+  const routes = copy.routes.map((route) => {
+    const bounds = new google.maps.LatLngBounds(
+      route.bounds.southwest,
+      route.bounds.northeast
+    );
+
+    const legs = route.legs.map((leg) => {
+      const steps = leg.steps.map((step) => {
+        const decodedPath = google.maps.geometry.encoding.decodePath(
+          step.polyline.points
+        );
+        
+        return {
+          distance: step.distance,
+          duration: step.duration,
           end_location: new google.maps.LatLng(
-            leg.end_location.lat,
-            leg.end_location.lng
+            step.end_location.lat,
+            step.end_location.lng
           ),
-          steps: leg.steps.map((step) => ({
-            path: google.maps.geometry.encoding.decodePath(
-              step.polyline.points
-            ),
-            start_location: new google.maps.LatLng(
-              step.start_location.lat,
-              step.start_location.lng
-            ),
-          })),
-        })),
-      };
-    }),
-  };
+          start_location: new google.maps.LatLng(
+            step.start_location.lat,
+            step.start_location.lng
+          ),
+          html_instructions: step.html_instructions,
+          maneuver: step.maneuver,
+          travel_mode: step.travel_mode,
+          encoded_lat_lngs: step.polyline.points,
+          path: decodedPath,
+          lat_lngs: decodedPath,
+          instructions: step.html_instructions,
+          start_point: new google.maps.LatLng(
+            step.start_location.lat,
+            step.start_location.lng
+          ),
+          end_point: new google.maps.LatLng(
+            step.end_location.lat,
+            step.end_location.lng
+          ),
+        } as unknown as google.maps.DirectionsStep;
+      });
+
+      return {
+        ...leg,
+        start_location: new google.maps.LatLng(
+          leg.start_location.lat,
+          leg.start_location.lng
+        ),
+        end_location: new google.maps.LatLng(
+          leg.end_location.lat,
+          leg.end_location.lng
+        ),
+        steps,
+        via_waypoints: [],
+        traffic_speed_entry: [],
+      } as unknown as google.maps.DirectionsLeg;
+    });
+
+    return {
+      bounds,
+      legs,
+      overview_path: google.maps.geometry.encoding.decodePath(
+        route.overview_polyline.points
+      ),
+      overview_polyline: route.overview_polyline,
+      warnings: route.warnings,
+      waypoint_order: route.waypoint_order,
+      summary: route.summary,
+      copyrights: route.copyrights,
+    } as unknown as google.maps.DirectionsRoute;
+  });
+
+  return {
+    routes,
+    status: copy.status,
+    available_travel_modes: copy.available_travel_modes as google.maps.TravelMode[],
+    geocoded_waypoints: copy.geocoded_waypoints,
+    request: {
+      ...copy.request,
+      destination: new google.maps.LatLng(
+        copy.request.data.destination.lat,
+        copy.request.data.destination.lng
+      ),
+      origin: new google.maps.LatLng(
+        copy.request.data.origin.lat,
+        copy.request.data.origin.lng
+      ),
+      travelMode: google.maps.TravelMode.DRIVING,
+    },
+  } as google.maps.DirectionsResult;
 }
