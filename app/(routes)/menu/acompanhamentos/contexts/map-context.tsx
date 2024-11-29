@@ -6,7 +6,6 @@ import { Route } from "@/app/(routes)/menu/acompanhamentos/types";
 import { MapContextValue } from "@/app/(routes)/menu/acompanhamentos/types/map-types";
 import { MAP_STYLES } from "../constants";
 import { mapReducer, initialMapState, MapState, MapAction } from "./map-reducer";
-import { socket } from "@/app/utils/socket-io";
 
 const MapContext = createContext<{
   state: MapState;
@@ -30,44 +29,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     `${process.env.NEXT_PUBLIC_API_URL}/routes`,
     fetcher
   );
-
-  // useEffect(() => {
-  //   socket.connect();
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, [socket]);
-
-  const subscribeRoute = useCallback(
-    async (routeId: string) => {
-      const response = await fetch(`http://localhost:3000/routes/${routeId}`);
-      const route = await response.json();
-      addRoute(route);
-
-    },
-    [mapRef]
-  );
-
-  useEffect(() => {
-    if (!socket.connected || !mapRef.current) return;
-    socket.on(
-      "admin-new-point",
-      async (data: { route_id: string; lat: number; lng: number }) => {
-        if (!hasRoute(data.route_id)) {
-          await subscribeRoute(data.route_id);
-        }
-        moveCar(data.route_id, {
-          lat: data.lat,
-          lng: data.lng,
-        });
-
-      }
-    );
-
-    return () => {
-      socket.off("admin-new-point");
-    };
-  }, [subscribeRoute]);
 
   useEffect(() => {
     if (routes) {
@@ -176,16 +137,16 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const hasRoute = (routeId: string) => {
-    return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
-  };
+  // const hasRoute = (routeId: string) => {
+  //   return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
+  // };
 
-  const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
-    const carMarker = markersRef.current.get(`${routeId}-car`);
-    if (carMarker) {
-      carMarker.setPosition(position);
-    }
-  };
+  // const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
+  //   const carMarker = markersRef.current.get(`${routeId}-car`);
+  //   if (carMarker) {
+  //     carMarker.setPosition(position);
+  //   }
+  // };
 
   const mapActions: MapContextValue = {
     addRoute,

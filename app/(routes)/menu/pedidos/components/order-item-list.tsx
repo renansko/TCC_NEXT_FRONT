@@ -11,11 +11,11 @@ import { Icons } from "@/components/ui/Icons"
 import type { OrderItemFormData } from "@/app/(routes)/menu/pedidos/types"
 
 interface OrderItemListProps {
-  items: OrderItemFormData[]
+  orders: OrderItemFormData[]
 }
 
-export function OrderItemList({ items }: OrderItemListProps) {
-  if (!items.length) return null
+export function OrderItemList({ orders }: OrderItemListProps) {
+  if (!orders.length) return null
 
   return (
     <motion.div
@@ -33,7 +33,7 @@ export function OrderItemList({ items }: OrderItemListProps) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {items.map((item, index) => (
+            {orders.map((order, index) => (
               <motion.li
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -42,13 +42,13 @@ export function OrderItemList({ items }: OrderItemListProps) {
                 className="border p-3 rounded-lg flex items-center justify-between hover:bg-accent/50 transition-colors"
               >
                 <div>
-                  <strong>{item.name}</strong>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <strong>{order.name}</strong>
+                  <p className="text-sm text-muted-foreground">{order.description}</p>
                 </div>
                 <div className="flex gap-4 text-sm">
-                  <span>Qtd: {item.quantity}</span>
-                  <span>R$ {item.amount}</span>
-                  <span>{item.weight}kg</span>
+                  <span>Qtd: {order.quantity}</span>
+                  <span>R$ {order.amount}</span>
+                  <span>{order.weight}kg</span>
                 </div>
               </motion.li>
             ))}
