@@ -137,16 +137,16 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const hasRoute = (routeId: string) => {
-    return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
-  };
+  // const hasRoute = (routeId: string) => {
+  //   return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
+  // };
 
-  const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
-    const carMarker = markersRef.current.get(`${routeId}-car`);
-    if (carMarker) {
-      carMarker.setPosition(position);
-    }
-  };
+  // const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
+  //   const carMarker = markersRef.current.get(`${routeId}-car`);
+  //   if (carMarker) {
+  //     carMarker.setPosition(position);
+  //   }
+  // };
 
   const mapActions: MapContextValue = {
     addRoute,
