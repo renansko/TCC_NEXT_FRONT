@@ -31,12 +31,12 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     fetcher
   );
 
-  useEffect(() => {
-    socket.connect();
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket]);
+  // useEffect(() => {
+  //   socket.connect();
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, [socket]);
 
   const subscribeRoute = useCallback(
     async (routeId: string) => {
@@ -67,7 +67,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     return () => {
       socket.off("admin-new-point");
     };
-  }, [socket, subscribeRoute]);
+  }, [subscribeRoute]);
 
   useEffect(() => {
     if (routes) {
