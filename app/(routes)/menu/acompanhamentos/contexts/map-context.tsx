@@ -29,7 +29,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     `${process.env.NEXT_PUBLIC_API_URL}/routes`,
     fetcher
   );
-
   useEffect(() => {
     if (routes) {
       dispatch({ type: "SET_ROUTES", payload: routes });
@@ -83,9 +82,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     if (!mapRef.current || !route.directions) return;
 
     // Decode the polyline
-    const path = google.maps.geometry.encoding.decodePath(
+    const path = route.directions.length > 0 ? google.maps.geometry.encoding.decodePath(
       route.directions.routes[0].overview_polyline.points
-    );
+    ) : [];
 
     // Create the polyline
     const polyline = new google.maps.Polyline({

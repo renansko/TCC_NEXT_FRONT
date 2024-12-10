@@ -1,7 +1,7 @@
 "use server";
 
 import { OrderResponse } from "../types";
-import { OrderFormData, OrderItemFormData } from "../types";
+import { OrderFormData } from "../types";
 
 const BASE_URL = "http://localhost:3400";
 
