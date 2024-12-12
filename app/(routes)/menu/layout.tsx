@@ -1,12 +1,18 @@
-"use client"
+import SidebarComponent from "@/components/ui/sidebar";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 
-import SidebarComponent from "@/components/ui/sidebar"
-
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
 
   return (
-    <div className="flex min-h-screen w-full">
-      <SidebarComponent>{children}</SidebarComponent>
-    </div>
+    <>  
+    <SignedIn>
+      <SidebarComponent>
+        {children}
+      </SidebarComponent>
+    </SignedIn>
+    <SignedOut> 
+      {children}
+    </SignedOut>
+    </>
   )
 }

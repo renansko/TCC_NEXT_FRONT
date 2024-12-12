@@ -1,3 +1,5 @@
+import { DirectionsResponseData } from '@googlemaps/google-maps-services-js';
+
 export interface Location {
   lat: number;
   lng: number;
@@ -5,30 +7,6 @@ export interface Location {
 
 export interface RoutePoint extends Location {
   timestamp: Date;
-}
-
-export interface Driver {
-  id: string;
-  name: string;
-  status: 'available' | 'on_route' | 'off_duty';
-  license: string;
-}
-
-export interface Vehicle {
-  id: string;
-  plate: string;
-  model: string;
-  status: 'active' | 'maintenance' | 'inactive';
-  currentDriver?: Driver;
-  fuelLevel: number;
-  lastMaintenance: Date;
-}
-
-export interface Client {
-  id: string;
-  name: string;
-  address: string;
-  coordinates: Location;
 }
 
 export interface RouteStatus {
@@ -41,31 +19,24 @@ export interface Route {
   id: string;
   name: string;
   status: RouteStatus;
-  vehicle?: Vehicle;
-  driver?: Driver;
-  client: Client;
-  origin: {
-    address: string;
+  source: {
+    name: string;
     location: Location;
   };
   destination: {
-    address: string;
+    name: string;
     location: Location;
   };
+  distance: number;
+  duration: number;
   currentLocation?: Location;
-  distance: {
-    total: number;
-    completed: number;
-    unit: 'km' | 'mi';
-  };
-  time: {
-    departure: Date;
-    estimated_arrival: Date;
-    duration: number;
-  };
-  path: {
-    completed: Location[];
-    remaining: Location[];
-  };
-  googleMapsData?: google.maps.DirectionsResult;
-} 
+  directions?: DirectionsResponseData & { request: Request };
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface CreateRouteRequest {
+  name: string;
+  source_id: string;
+  destination_id: string;
+}

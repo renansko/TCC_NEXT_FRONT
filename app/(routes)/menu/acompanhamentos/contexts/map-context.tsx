@@ -1,312 +1,243 @@
 "use client";
 
-import { createContext, useContext, useRef, useEffect, useState } from 'react';
-import type { Route, Location } from '../types';
-import { MAP_STYLES } from '../constants';
+import { createContext, useContext, useRef, useEffect, useReducer, useCallback } from "react";
+import useSWR from "swr";
+import { Route } from "@/app/(routes)/menu/acompanhamentos/types";
+import { MapContextValue } from "@/app/(routes)/menu/acompanhamentos/types/map-types";
+import { MAP_STYLES } from "../constants";
+import { mapReducer, initialMapState, MapState, MapAction } from "./map-reducer";
+import { socket } from "@/app/utils/socket-io";
 
-interface MapContextValue {
-  map: google.maps.Map | null;
-  isLoading: boolean;
-  addRoute: (route: Route) => void;
-  updateRoutePosition: (routeId: string, position: Location) => void;
-  removeRoute: (routeId: string) => void;
-  panTo: (location: Location) => void;
-  fitBounds: (routes: Route[]) => void;
-  resetView: () => void;
-}
+const MapContext = createContext<{
+  state: MapState;
+  dispatch: React.Dispatch<MapAction>;
+  mapActions: MapContextValue;
+} | null>(null);
 
-const MapContext = createContext<MapContextValue | null>(null);
+const DEFAULT_CENTER = { lat: -23.55052, lng: -46.633309 }; // São Paulo
+const DEFAULT_ZOOM = 12;
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export function MapProvider({ children }: { children: React.ReactNode }) {
-  const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, dispatch] = useReducer(mapReducer, initialMapState);
+  const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const routesRef = useRef<Map<string, google.maps.Polyline>>(new Map());
-  const isCtrlPressed = useRef(false);
 
-  const defaultCenter = { lat: -23.550520, lng: -46.633309 }; // São Paulo
+  // Fetch routes data
+  const { data: routes, error, mutate } = useSWR<Route[]>(
+    `${process.env.NEXT_PUBLIC_API_URL}/routes`,
+    fetcher
+  );
 
-  // Handle keyboard events
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Control') {
-        isCtrlPressed.current = true;
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Control') {
-        isCtrlPressed.current = false;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
+    socket.connect();
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      socket.disconnect();
     };
-  }, []);
+  }, [socket]);
 
-  // Handle map container events
+  const subscribeRoute = useCallback(
+    async (routeId: string) => {
+      const response = await fetch(`http://localhost:3000/routes/${routeId}`);
+      const route = await response.json();
+      addRoute(route);
+
+    },
+    [mapRef]
+  );
+
   useEffect(() => {
-    if (!mapContainerRef.current) return;
-
-    const container = mapContainerRef.current;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (isCtrlPressed.current) {
-        e.preventDefault(); // Prevent browser zoom
-        
-        if (map) {
-          const center = map.getCenter()!;
-          const zoom = map.getZoom()!;
-          
-          // Determine zoom direction
-          if (e.deltaY < 0) {
-            map.setZoom(zoom + 0.5);
-          } else {
-            map.setZoom(zoom - 0.5);
-          }
-          
-          map.setCenter(center);
+    if (!socket.connected || !mapRef.current) return;
+    socket.on(
+      "admin-new-point",
+      async (data: { route_id: string; lat: number; lng: number }) => {
+        if (!hasRoute(data.route_id)) {
+          await subscribeRoute(data.route_id);
         }
-      }
-    };
-
-    const handleMouseDown = (e: MouseEvent) => {
-      // Right click or ctrl+left click for map rotation
-      if (e.button === 2 || (e.button === 0 && isCtrlPressed.current)) {
-        e.preventDefault();
-      }
-    };
-
-    const handleContextMenu = (e: Event) => {
-      e.preventDefault(); // Prevent context menu
-    };
-
-    // Add passive: false to allow preventDefault() on wheel events
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    container.addEventListener('mousedown', handleMouseDown);
-    container.addEventListener('contextmenu', handleContextMenu);
-
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('mousedown', handleMouseDown);
-      container.removeEventListener('contextmenu', handleContextMenu);
-    };
-  }, [map]);
-
-  // Initialize map
-  useEffect(() => {
-    if (!mapContainerRef.current || map) return;
-
-    const initMap = () => {
-      if (!window.google?.maps) {
-        console.error('Google Maps not loaded');
-        return;
-      }
-
-      try {
-        const mapInstance = new google.maps.Map(mapContainerRef.current!, {
-          zoom: 12,
-          center: { lat: -23.550520, lng: -46.633309 }, // São Paulo
-          styles: MAP_STYLES.DEFAULT,
-          disableDefaultUI: true,
-          zoomControl: true,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          gestureHandling: 'cooperative', // Enables scroll zoom only with Ctrl key
-          minZoom: 3, // Prevent zooming out too far
-          maxZoom: 20, // Prevent zooming in too far
-          restriction: {
-            latLngBounds: {
-              north: 5.272, // Brazil bounds
-              south: -33.742,
-              west: -73.992,
-              east: -34.793,
-            },
-            strictBounds: true,
-          },
+        moveCar(data.route_id, {
+          lat: data.lat,
+          lng: data.lng,
         });
 
-        // Add keyboard shortcuts
-        google.maps.event.addDomListener(window, 'keydown', (e: KeyboardEvent) => {
-          if (mapInstance) {
-            const zoom = mapInstance.getZoom()!;
-            
-            // Ctrl + Plus: Zoom in
-            if (e.ctrlKey && e.key === '+') {
-              e.preventDefault();
-              mapInstance.setZoom(zoom + 1);
-            }
-            
-            // Ctrl + Minus: Zoom out
-            if (e.ctrlKey && e.key === '-') {
-              e.preventDefault();
-              mapInstance.setZoom(zoom - 1);
-            }
-            
-            // Ctrl + 0: Reset zoom
-            if (e.ctrlKey && e.key === '0') {
-              e.preventDefault();
-              mapInstance.setZoom(12);
-            }
-          }
-        });
-
-        setMap(mapInstance);
-        
-        // Force a resize after initialization
-        setTimeout(() => {
-          mapInstance.setCenter({ lat: -23.550520, lng: -46.633309 });
-          window.google.maps.event.trigger(mapInstance, 'resize');
-        }, 100);
-
-      } catch (error) {
-        console.error('Error initializing map:', error);
-      } finally {
-        setIsLoading(false);
       }
+    );
+
+    return () => {
+      socket.off("admin-new-point");
     };
+  }, [socket, subscribeRoute]);
 
-    if (window.google?.maps) {
-      initMap();
-    } else {
-      const checkGoogleMaps = setInterval(() => {
-        if (window.google?.maps) {
-          clearInterval(checkGoogleMaps);
-          initMap();
-        }
-      }, 100);
-
-      return () => clearInterval(checkGoogleMaps);
+  useEffect(() => {
+    if (routes) {
+      dispatch({ type: "SET_ROUTES", payload: routes });
     }
+    if (error) {
+      dispatch({ type: "SET_ERROR", payload: error });
+    }
+  }, [routes, error]);
+
+  const initializeMap = useCallback((mapDiv: HTMLDivElement) => {
+    if (mapRef.current || !window.google?.maps) return;
+
+    mapRef.current = new google.maps.Map(mapDiv, {
+      zoom: DEFAULT_ZOOM,
+      center: DEFAULT_CENTER,
+      styles: MAP_STYLES,
+      disableDefaultUI: true,
+      zoomControl: true,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
+    });
+
+    dispatch({ type: "SET_MAP", payload: mapRef.current });
+    dispatch({ type: "SET_LOADING", payload: false });
   }, []);
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (map) {
-        markersRef.current.forEach(marker => marker.setMap(null));
-        routesRef.current.forEach(route => route.setMap(null));
-        markersRef.current.clear();
-        routesRef.current.clear();
+  const clearMapElements = () => {
+    markersRef.current.forEach(marker => marker.setMap(null));
+    routesRef.current.forEach(route => route.setMap(null));
+    markersRef.current.clear();
+    routesRef.current.clear();
+  };
+
+  const removeRoute = (routeId: string) => {
+    markersRef.current.forEach((marker, key) => {
+      if (key.startsWith(routeId)) {
+        marker.setMap(null);
+        markersRef.current.delete(key);
       }
-    };
-  }, [map]);
+    });
+
+    const route = routesRef.current.get(routeId);
+    if (route) {
+      route.setMap(null);
+      routesRef.current.delete(routeId);
+    }
+  };
+
+  const addRoute = (route: Route) => {
+    if (!mapRef.current || !route.directions) return;
+
+    // Decode the polyline
+    const path = google.maps.geometry.encoding.decodePath(
+      route.directions.routes[0].overview_polyline.points
+    );
+
+    // Create the polyline
+    const polyline = new google.maps.Polyline({
+      path,
+      geodesic: true,
+      strokeColor: "#2196F3",
+      strokeOpacity: 0.8,
+      strokeWeight: 3,
+      map: mapRef.current,
+    });
+
+    // Add markers
+    const startMarker = new google.maps.Marker({
+      position: route.source.location,
+      map: mapRef.current,
+      title: 'Origem',
+      icon: {
+        url: '/markers/start.png',
+        scaledSize: new google.maps.Size(32, 32)
+      }
+    });
+
+    const endMarker = new google.maps.Marker({
+      position: route.destination.location,
+      map: mapRef.current,
+      title: 'Destino',
+      icon: {
+        url: '/markers/end.png',
+        scaledSize: new google.maps.Size(32, 32)
+      }
+    });
+
+    // Store references for cleanup
+    routesRef.current.set(route.id, polyline);
+    markersRef.current.set(`${route.id}-start`, startMarker);
+    markersRef.current.set(`${route.id}-end`, endMarker);
+
+    if (route.currentLocation) {
+      const carMarker = new google.maps.Marker({
+        position: route.currentLocation,
+        map: mapRef.current,
+        title: 'Veículo',
+        icon: {
+          url: '/markers/car.png',
+          scaledSize: new google.maps.Size(32, 32)
+        }
+      });
+      markersRef.current.set(`${route.id}-car`, carMarker);
+    }
+  };
+
+  const hasRoute = (routeId: string) => {
+    return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
+  };
+
+  const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
+    const carMarker = markersRef.current.get(`${routeId}-car`);
+    if (carMarker) {
+      carMarker.setPosition(position);
+    }
+  };
+
+  const mapActions: MapContextValue = {
+    addRoute,
+    removeRoute,
+    initializeMap,
+    updateRoutePosition: (routeId, position) => {
+      const marker = markersRef.current.get(routeId);
+      if (marker) {
+        marker.setPosition(position);
+      }
+    },
+    panTo: (location) => {
+      mapRef.current?.panTo(location);
+    },
+    fitBounds: (routes) => {
+      if (!mapRef.current || routes.length === 0) return;
+
+      const bounds = new google.maps.LatLngBounds();
+      routes.forEach((route) => {
+        bounds.extend(route.source.location);
+        bounds.extend(route.destination.location);
+        if (route.currentLocation) {
+          bounds.extend(route.currentLocation);
+        }
+      });
+      mapRef.current.fitBounds(bounds);
+    },
+    resetView: () => {
+      if (!mapRef.current) return;
+      mapRef.current.setZoom(DEFAULT_ZOOM);
+      mapRef.current.setCenter(DEFAULT_CENTER);
+    },
+    refresh: () => {
+      mutate();
+    },
+    selectRouteInfo: (routeInfo: Route) => {
+      dispatch({ type: "SET_SELECTED_ROUTE_INFO", payload: routeInfo });
+    },
+    clearMapElements,
+  };
 
   return (
-    <div className="relative w-full h-full">
-      <div 
-        ref={mapContainerRef} 
-        className="absolute inset-0"
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-      <MapContext.Provider value={{
-        map,
-        isLoading,
-        addRoute: (route) => {
-          if (!map) return;
-
-          // Add route polyline
-          const path = [...route.path.completed, ...route.path.remaining];
-          const polyline = new google.maps.Polyline({
-            path,
-            geodesic: true,
-            strokeColor: '#FF0000',
-            strokeOpacity: 1.0,
-            strokeWeight: 2,
-            map,
-          });
-
-          // Add vehicle marker
-          if (route.currentLocation) {
-            const marker = new google.maps.Marker({
-              position: route.currentLocation,
-              map,
-              title: `${route.vehicle?.plate} - ${route.driver?.name}`,
-            });
-            markersRef.current.set(route.id, marker);
-          }
-
-          routesRef.current.set(route.id, polyline);
-        },
-        updateRoutePosition: (routeId, position) => {
-          const marker = markersRef.current.get(routeId);
-          if (marker) {
-            marker.setPosition(position);
-          }
-        },
-        removeRoute: (routeId) => {
-          const marker = markersRef.current.get(routeId);
-          const route = routesRef.current.get(routeId);
-          
-          if (marker) {
-            marker.setMap(null);
-            markersRef.current.delete(routeId);
-          }
-          
-          if (route) {
-            route.setMap(null);
-            routesRef.current.delete(routeId);
-          }
-        },
-        panTo: (location) => {
-          map?.panTo(location);
-        },
-        fitBounds: (routes) => {
-          if (!map || routes.length === 0) return;
-
-          const bounds = new google.maps.LatLngBounds();
-          routes.forEach(route => {
-            bounds.extend(route.origin.location);
-            bounds.extend(route.destination.location);
-            if (route.currentLocation) {
-              bounds.extend(route.currentLocation);
-            }
-          });
-          map.fitBounds(bounds);
-        },
-        resetView: () => {
-          if (!map) return;
-
-          // Try to get user's location
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                map.setZoom(12);
-                map.panTo({
-                  lat: position.coords.latitude,
-                  lng: position.coords.longitude,
-                });
-              },
-              () => {
-                // If geolocation fails, center on default location
-                map.setZoom(12);
-                map.panTo(defaultCenter);
-              }
-            );
-          } else {
-            // If geolocation is not supported, center on default location
-            map.setZoom(12);
-            map.panTo(defaultCenter);
-          }
-        },
-      }}>
+      <MapContext.Provider value={{ state, dispatch, mapActions }}>
         {children}
       </MapContext.Provider>
-    </div>
   );
 }
 
 export function useMap() {
   const context = useContext(MapContext);
   if (!context) {
-    throw new Error('useMap must be used within a MapProvider');
+    throw new Error("useMap must be used within a MapProvider");
   }
   return context;
-} 
+}

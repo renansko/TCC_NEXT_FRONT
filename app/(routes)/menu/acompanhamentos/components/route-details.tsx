@@ -1,9 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Truck, User, MapPin, Clock, X } from "lucide-react";
-import type { Route } from "../types";
-import { format } from "date-fns";
+import { Truck, MapPin, Clock} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Accordion,
@@ -11,15 +9,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useMap } from "../contexts/map-context";
 
 interface RouteDetailsProps {
-  route: Route;
   className?: string;
 }
 
-export function RouteDetails({ route, className}: RouteDetailsProps) {
-  const progressPercent = (route.distance.completed / route.distance.total) * 100;
+export function RouteDetails({  className}: RouteDetailsProps) {
+  const { state: { selectedRouteInfo }} = useMap(); 
 
+  if (!selectedRouteInfo) return null;
+  const progressPercent = 0
   return (
     <Card className={cn("shadow-lg transition-all pointer-events-auto", className)}>
       <Accordion type="single" collapsible defaultValue="details">
@@ -29,8 +29,8 @@ export function RouteDetails({ route, className}: RouteDetailsProps) {
               <div className="flex items-center gap-2">
                 <Truck className="h-5 w-5" />
                 <div>
-                  <h3 className="font-semibold text-left">{route.vehicle?.plate}</h3>
-                  <p className="text-sm text-muted-foreground">{route.driver?.name}</p>
+                  <h3 className="font-semibold text-left">{selectedRouteInfo.name}</h3>
+                  <p className="text-sm text-muted-foreground">{selectedRouteInfo.source.name}</p>
                 </div>
               </div>
             </div>
@@ -63,23 +63,23 @@ export function RouteDetails({ route, className}: RouteDetailsProps) {
                     <InfoItem
                       icon={MapPin}
                       label="Origin"
-                      value={route.origin.address}
+                      value={selectedRouteInfo?.source.name}
                     />
                     <InfoItem
                       icon={MapPin}
                       label="Destination"
-                      value={route.destination.address}
+                      value={selectedRouteInfo?.destination.name}
                     />
                     <div className="grid grid-cols-2 gap-4">
                       <InfoItem
                         icon={Clock}
                         label="Departure"
-                        value={format(route.time.departure, "HH:mm")}
+                        // value={format(route.updated_at, "HH:mm")}
                       />
                       <InfoItem
                         icon={Clock}
                         label="Arrival"
-                        value={format(route.time.estimated_arrival, "HH:mm")}
+                        // value={format(route.duration, "HH:mm")}
                       />
                     </div>
                   </div>

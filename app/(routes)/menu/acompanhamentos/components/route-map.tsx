@@ -9,35 +9,24 @@ interface RouteMapProps {
   selectedRoute: Route | null;
 }
 
-export function RouteMap({ routes, selectedRoute }: RouteMapProps) {
-  const { map, isLoading, addRoute, removeRoute, fitBounds, resetView } = useMap();
+export function RouteMap({ selectedRoute, routes }: RouteMapProps) {
+  const { mapActions: { addRoute, removeRoute, fitBounds }} = useMap();
 
   useEffect(() => {
-    if (!map || !routes.length || isLoading) return;
+    if (!routes.length) return;
 
     // Clear existing routes
     routes.forEach(route => removeRoute(route.id));
 
-    // Add all routes
-    routes.forEach(route => addRoute(route));
-
-    // If no route is selected, show all routes
-    if (!selectedRoute) {
-      fitBounds(routes);
-    }
-  }, [map, routes, isLoading, selectedRoute]);
-
-  useEffect(() => {
-    if (!map || isLoading) return;
-
+    // Add only selected route or all routes if none selected
     if (selectedRoute) {
-      // Center map on selected route
+      addRoute(selectedRoute);
       fitBounds([selectedRoute]);
     } else {
-      // Reset view when no route is selected
-      resetView();
+      routes.forEach(route => addRoute(route));
+      fitBounds(routes);
     }
-  }, [map, selectedRoute, isLoading]);
+  }, [routes, selectedRoute]);
 
   return null;
 } 

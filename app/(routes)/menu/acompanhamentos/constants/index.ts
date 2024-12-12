@@ -20,19 +20,46 @@ export const ROUTE_STATUS = {
     color: "red",
   },
 } as const;
+export const MAP_STYLES = [
+  {
+    featureType: 'all',
+    elementType: 'geometry',
+    stylers: [{ visibility: 'simplified' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }]
+  },
+  {
+    featureType: 'transit',
+    elementType: 'labels',
+    stylers: [{ visibility: 'off' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels',
+    stylers: [{ visibility: 'simplified' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#b3d1ff' }]
+  },
+  {
+    featureType: 'landscape',
+    elementType: 'geometry',
+    stylers: [{ color: '#f5f5f5' }]
+  }
+];
 
-export const MAP_STYLES = {
-  DEFAULT: [
-    {
-      featureType: "all",
-      elementType: "geometry.fill",
-      stylers: [{ weight: "2.00" }],
-    },
-    {
-      featureType: "all",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#9c9c9c" }],
-    },
-    // Add more styles as needed
-  ],
-}; 
+export const DEFAULT_MAP_CONFIG = {
+  zoom: 12,
+  center: { lat: -23.550520, lng: -46.633309 }, // São Paulo
+  styles: MAP_STYLES,
+  disableDefaultUI: true,
+  zoomControl: true,
+  mapTypeControl: false,
+  streetViewControl: false,
+  fullscreenControl: false,
+};

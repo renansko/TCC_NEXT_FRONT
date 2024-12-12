@@ -31,10 +31,10 @@ export function Breadcrumbs() {
                 <Icons.home />
               </Link>
             ) : (
-              <>
+              <div className="flex items-center gap-2">
                 <BreadcrumbLink href={href}>{text}</BreadcrumbLink>
-                {!isLast && <BreadcrumbSeparator />}
-              </>
+                <BreadcrumbSeparator />
+              </div>
             )}
           </BreadcrumbItem>
         ))}
