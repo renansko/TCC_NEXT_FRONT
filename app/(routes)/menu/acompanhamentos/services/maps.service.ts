@@ -12,6 +12,7 @@ export class MapsService {
     return response.json();
   }
 
+
   static async getDirections(originId: string, destinationId: string): Promise<DirectionsResponseData & {request: Request}> {
     const queryParams = new URLSearchParams({
       originId,
@@ -27,7 +28,7 @@ export class MapsService {
 
   static async createRoute(data: CreateRouteRequest): Promise<Route> {
     const response = await fetch(`${API_URL}/routes`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         'Content-Type': 'application/json',
       },

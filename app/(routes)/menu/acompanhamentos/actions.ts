@@ -2,7 +2,7 @@ import { Route, CreateRouteRequest } from './types';
 
 export async function createRoute(data: CreateRouteRequest) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/routes`, {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },

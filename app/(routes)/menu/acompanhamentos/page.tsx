@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { ErrorAlert } from '@/components/ui/errors/ErrorAlert';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useMap } from './contexts/map-context';
@@ -17,10 +17,10 @@ export default function AcompanhamentoPage() {
     setShowNewRouteModal(true);
   }, []);
 
-  // const handleRouteCreated = useCallback(() => {
-  //   setShowNewRouteModal(false);
-  //   refresh();
-  // }, [refresh]);
+  const handleRouteCreated = useCallback(() => {
+    setShowNewRouteModal(false);
+    refresh();
+  }, [refresh]);
 
   if (isLoading) {
     return (
@@ -29,6 +29,8 @@ export default function AcompanhamentoPage() {
       </div>
     );
   }
+
+  if (!routes.length) return null;
 
   if (error) {
     return (
@@ -45,7 +47,7 @@ export default function AcompanhamentoPage() {
   if (!routes.length) return null;
 
   return (
-    <div className="relative w-full h-[calc(100vh-8rem)] ">
+    <div key="acompanhamento-page" className="relative w-full h-[calc(100vh-8rem)]">
       <div className="flex flex-col h-full gap-4">
         <RouteList routes={routes} />
         <div className="relative flex-1">
@@ -59,20 +61,27 @@ export default function AcompanhamentoPage() {
       <NewRouteModal 
         open={showNewRouteModal}
         onOpenChange={setShowNewRouteModal}
-        onRouteCreated={() => {}}
+        onRouteCreated={handleRouteCreated}
       />
     </div>
   );
 }
 const RouteList = ({ routes }: { routes: Route[] }) => {
-  const { mapActions: { selectRouteInfo }} = useMap();
+  const { mapActions: { selectRouteInfo } } = useMap();
+  const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
+
+  const handleSelectRouteInfo = useCallback((route: Route) => {
+    setSelectedRoute(route);
+  }, []);
+  useEffect(() => {
+    if (selectedRoute) {
+      selectRouteInfo(selectedRoute);
+    }
+  }, [selectedRoute, selectRouteInfo]);
   if (!routes.length) return null;
   const destination = routes[0].destination.name.split(',')[0];
   const source = routes[0].source.name.split(',')[0];
-  
-  const handleSelectRouteInfo = (route: Route) => {
-    selectRouteInfo(route);
-  }
+
   return (
     <div className="flex gap-2 w-full w-max-[calc(100vw-2rem)] overflow-x-auto">
       {routes.map((route) => (
@@ -94,7 +103,9 @@ const RouteList = ({ routes }: { routes: Route[] }) => {
                 </div>
               </div>
               <div className="text-sm text-gray-500">
-                {route.directions?.routes[0].summary}
+              {route.directions?.routes && route.directions.routes.length > 0
+                    ? route.directions.routes[0].summary
+                    : "Resumo da rota não disponível"}
               </div>
             </div>
           </CardHeader>

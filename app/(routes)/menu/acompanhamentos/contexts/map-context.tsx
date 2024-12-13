@@ -32,45 +32,6 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     `${process.env.NEXT_PUBLIC_API_URL}/routes`,
     fetcher
   );
-
-  useEffect(() => {
-    socket.connect();
-    return () => {
-      socket.disconnect();
-    };
-  }, [socket]);
-
-  const subscribeRoute = useCallback(
-    async (routeId: string) => {
-      const response = await fetch(`http://localhost:3000/routes/${routeId}`);
-      const route = await response.json();
-      addRoute(route);
-
-    },
-    [mapRef]
-  );
-
-  useEffect(() => {
-    if (!socket.connected || !mapRef.current) return;
-    socket.on(
-      "admin-new-point",
-      async (data: { route_id: string; lat: number; lng: number }) => {
-        if (!hasRoute(data.route_id)) {
-          await subscribeRoute(data.route_id);
-        }
-        moveCar(data.route_id, {
-          lat: data.lat,
-          lng: data.lng,
-        });
-
-      }
-    );
-
-    return () => {
-      socket.off("admin-new-point");
-    };
-  }, [socket, subscribeRoute]);
-
   useEffect(() => {
     if (routes) {
       dispatch({ type: "SET_ROUTES", payload: routes });
@@ -124,9 +85,9 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     if (!mapRef.current || !route.directions) return;
 
     // Decode the polyline
-    const path = google.maps.geometry.encoding.decodePath(
+    const path = route.directions.routes.length > 0 ? google.maps.geometry.encoding.decodePath(
       route.directions.routes[0].overview_polyline.points
-    );
+    ) : [];
 
     // Create the polyline
     const polyline = new google.maps.Polyline({
@@ -181,16 +142,16 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     }
   }, [mapRef]);
 
-  const hasRoute = (routeId: string) => {
-    return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
-  };
+  // const hasRoute = (routeId: string) => {
+  //   return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
+  // };
 
-  const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
-    const carMarker = markersRef.current.get(`${routeId}-car`);
-    if (carMarker) {
-      carMarker.setPosition(position);
-    }
-  };
+  // const moveCar = (routeId: string, position: google.maps.LatLngLiteral) => {
+  //   const carMarker = markersRef.current.get(`${routeId}-car`);
+  //   if (carMarker) {
+  //     carMarker.setPosition(position);
+  //   }
+  // };
 
   const mapActions: MapContextValue = {
     addRoute,
