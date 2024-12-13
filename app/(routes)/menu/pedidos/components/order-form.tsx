@@ -1,6 +1,6 @@
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,34 +19,54 @@ import { Icons } from "@/components/ui/Icons"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
-import { Loader2 } from "lucide-react"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { mockItems, mockTransfers, mockUsers } from "../mock/data"
+import { useEffect } from "react"
+import { useMapsLibrary } from "@/hooks/use-maps-library"
+import { AddressSearch } from "./address-search"
+import type { AddressDetails } from "../types/google-places"
+import { Select, SelectValue, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select"
+import { mockItems } from "../mock/data"
 
 interface OrderFormProps {
   onSubmit: (data: OrderFormData) => void
-  isLoading?: boolean
+  isEditing?: boolean
+  initialData?: OrderFormData
 }
 
-export function OrderForm({ onSubmit, isLoading }: OrderFormProps) {
+export function OrderForm({ onSubmit, isEditing, initialData }: OrderFormProps) {
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
-      itemId: "",
-      userId: "",
-      name: "",
-      dateRequested: new Date(),
-      dateDelivery: new Date(),
-      deliveryAddress: "",
-      status: "Pendente",
+      itemId: initialData?.itemId || "",
+      userId: initialData?.userId || "",
+      originAddress: initialData?.originAddress || "",
+      deliveryAddress: initialData?.deliveryAddress || "",
+      status: initialData?.status || "Pendente",
+      dateRequested: initialData?.dateRequested || new Date(),
+      dateDelivery: initialData?.dateDelivery || new Date(),
+      transferId: initialData?.transferId || "",
+      orderNumber: initialData?.orderNumber || "",
+      name: initialData?.name || "",
+      createdAt: initialData?.createdAt || new Date(),
+      updatedAt: initialData?.updatedAt || new Date(),
     },
   })
+
+  const maps = useMapsLibrary('places')
+
+  // Handle address selection with coordinates
+  const handleAddressSelect = (fieldName: keyof OrderFormData) => {
+    return (address: string, details?: AddressDetails) => {
+      form.setValue(fieldName, address)
+
+      // If we have geometry details, update coordinates
+      if (details?.geometry?.location) {
+        const { lat, lng } = details.geometry.location
+        // You might want to store these coordinates in your form data
+        // form.setValue(`${fieldName}Coordinates`, { lat, lng })
+        console.log(`${fieldName} coordinates:`, { lat, lng })
+      }
+    }
+  }
 
   return (
     <Form {...form}>
@@ -89,11 +109,8 @@ export function OrderForm({ onSubmit, isLoading }: OrderFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {mockUsers.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name} - {user.email}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="1">Cliente 1</SelectItem>
+                  <SelectItem value="2">Cliente 2</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -103,38 +120,15 @@ export function OrderForm({ onSubmit, isLoading }: OrderFormProps) {
 
         <FormField
           control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nome</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="dateRequested"
           render={({ field }) => (
-            <FormItem className="flex flex-col">
+            <FormItem>
               <FormLabel>Data do Pedido</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={`w-[240px] pl-3 text-left font-normal ${
-                        !field.value && "text-muted-foreground"
-                      }`}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                      <Icons.calendar className="ml-auto h-4 w-4 opacity-50" />
+                    <Button variant="outline">
+                      {field.value ? format(field.value, "dd/MM/yyyy") : "Selecione uma data"}
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
@@ -154,59 +148,49 @@ export function OrderForm({ onSubmit, isLoading }: OrderFormProps) {
             </FormItem>
           )}
         />
-        <FormField
+
+        <Controller
+          name="originAddress"
           control={form.control}
-          name="dateDelivery"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Data de Entrega</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={`w-[240px] pl-3 text-left font-normal ${
-                        !field.value && "text-muted-foreground"
-                      }`}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Selecione uma data</span>
-                      )}
-                      <Icons.calendar className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) =>
-                      date < new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="deliveryAddress"
-          render={({ field }) => (
+          rules={{ required: "Endereço de origem é obrigatório" }}
+          render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel>Endereço de Entrega</FormLabel>
+              <FormLabel>Endereço de Origem</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <AddressSearch
+                  label="Endereço de Origem"
+                  placeholder="Digite o endereço de origem"
+                  field={field}
+                  error={fieldState.error}
+                  onAddressSelect={handleAddressSelect("originAddress")}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <Controller
+          name="deliveryAddress"
+          control={form.control}
+          rules={{ required: "Endereço de entrega é obrigatório" }}
+          render={({ field, fieldState }) => (
+            <FormItem>
+              <FormLabel>Endereço de Entrega</FormLabel>
+              <FormControl>
+                <AddressSearch
+                  label="Endereço de Entrega"
+                  placeholder="Digite o endereço de entrega"
+                  field={field}
+                  error={fieldState.error}
+                  onAddressSelect={handleAddressSelect("deliveryAddress")}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="status"
@@ -220,44 +204,12 @@ export function OrderForm({ onSubmit, isLoading }: OrderFormProps) {
             </FormItem>
           )}
         />
-        {/* <FormField
-          control={form.control}
-          name="transferId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Transporte</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione um transporte" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {mockTransfers.map((transfer) => (
-                    <SelectItem key={transfer.id} value={transfer.id}>
-                      {transfer.name} - {transfer.plate}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        /> */}
+
         <div className="flex justify-end gap-3">
           <DialogClose asChild>
-            <Button variant="outline" type="button">Cancelar</Button>
+            <Button variant="outline">Cancelar</Button>
           </DialogClose>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Cadastrando...
-              </>
-            ) : (
-              'Cadastrar Pedido'
-            )}
-          </Button>
+          <Button type="submit">Cadastrar Pedido</Button>
         </div>
       </form>
     </Form>

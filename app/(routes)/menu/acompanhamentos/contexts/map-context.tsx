@@ -1,11 +1,13 @@
 "use client";
 
-import { createContext, useContext, useRef, useEffect, useReducer, useCallback } from "react";
+import { createContext, useContext, useRef, useEffect, useReducer, useCallback, useState } from "react";
 import useSWR from "swr";
 import { Route } from "@/app/(routes)/menu/acompanhamentos/types";
 import { MapContextValue } from "@/app/(routes)/menu/acompanhamentos/types/map-types";
 import { MAP_STYLES } from "../constants";
 import { mapReducer, initialMapState, MapState, MapAction } from "./map-reducer";
+import { socket } from "@/app/utils/socket-io";
+import { useInterval } from "@/app/hooks/useInterval";
 
 const MapContext = createContext<{
   state: MapState;
@@ -23,6 +25,7 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
   const routesRef = useRef<Map<string, google.maps.Polyline>>(new Map());
+  const [activeRoutes, setActiveRoutes] = useState<Set<string>>(new Set());
 
   // Fetch routes data
   const { data: routes, error, mutate } = useSWR<Route[]>(
@@ -78,11 +81,11 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addRoute = (route: Route) => {
+  const addRoute = useCallback((route: Route) => {
     if (!mapRef.current || !route.directions) return;
 
     // Decode the polyline
-    const path = route.directions.length > 0 ? google.maps.geometry.encoding.decodePath(
+    const path = route.directions.routes.length > 0 ? google.maps.geometry.encoding.decodePath(
       route.directions.routes[0].overview_polyline.points
     ) : [];
 
@@ -122,19 +125,22 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     markersRef.current.set(`${route.id}-start`, startMarker);
     markersRef.current.set(`${route.id}-end`, endMarker);
 
-    if (route.currentLocation) {
+    // Add car marker if route is active and has status
+    if (route.status?.code === 'in_progress') {
       const carMarker = new google.maps.Marker({
-        position: route.currentLocation,
+        position: path[0], // Start at beginning of route
         map: mapRef.current,
         title: 'Veículo',
         icon: {
-          url: '/markers/car.png',
+          url: '/markers/truck.png',
           scaledSize: new google.maps.Size(32, 32)
         }
       });
+
       markersRef.current.set(`${route.id}-car`, carMarker);
+      setActiveRoutes(prev => new Set(prev).add(route.id));
     }
-  };
+  }, [mapRef]);
 
   // const hasRoute = (routeId: string) => {
   //   return markersRef.current.has(`${routeId}-start`) && markersRef.current.has(`${routeId}-end`);
@@ -186,6 +192,43 @@ export function MapProvider({ children }: { children: React.ReactNode }) {
     },
     clearMapElements,
   };
+
+  // Simulate truck movement
+  useInterval(() => {
+    if (!mapRef.current || activeRoutes.size === 0) return;
+
+    activeRoutes.forEach(routeId => {
+      const route = routes?.find(r => r.id === routeId);
+      if (!route || !route.directions) return;
+
+      // Get path points from the route
+      const path = google.maps.geometry.encoding.decodePath(
+        route.directions.routes[0].overview_polyline.points
+      );
+
+      // Get current marker position
+      const carMarker = markersRef.current.get(`${routeId}-car`);
+      if (!carMarker) return;
+
+      const currentPos = carMarker.getPosition();
+      if (!currentPos) return;
+
+      // Find next point in path
+      const currentIndex = path.findIndex(point => 
+        point.lat() === currentPos.lat() && 
+        point.lng() === currentPos.lng()
+      );
+
+      if (currentIndex < path.length - 1) {
+        const nextPoint = path[currentIndex + 1];
+        carMarker.setPosition(nextPoint);
+      } else {
+        // Route completed
+        activeRoutes.delete(routeId);
+        setActiveRoutes(new Set(activeRoutes));
+      }
+    });
+  }, 1000); // Update every second
 
   return (
       <MapContext.Provider value={{ state, dispatch, mapActions }}>

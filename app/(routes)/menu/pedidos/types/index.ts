@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { orderSchema, orderItemSchema } from "../schemas"
+import { orderSchema } from "../schemas"
 
 export interface OrderResponse {
   id: string
@@ -10,8 +10,18 @@ export interface OrderResponse {
   transferId: string
   dateRequested: Date
   dateDelivery: Date
+  originAddress: string
+  // Optional: store coordinates
+  originCoordinates?: {
+    lat: number
+    lng: number
+  }
   deliveryAddress: string
-  outgoingAddress: string
+  // Optional: store coordinates
+  deliveryCoordinates?: {
+    lat: number
+    lng: number
+  }
   status: string
   createdAt: Date
   updatedAt: Date
@@ -41,4 +51,3 @@ export interface OrderResponse {
 } 
 
 export type OrderFormData = z.infer<typeof orderSchema>
-export type OrderItemFormData = z.infer<typeof orderItemSchema> 

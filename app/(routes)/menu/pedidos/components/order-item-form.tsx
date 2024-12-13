@@ -18,17 +18,19 @@ import type { OrderItemFormData } from "@/app/(routes)/menu/pedidos/types"
 
 interface OrderItemFormProps {
   onSubmit: (data: OrderItemFormData) => void
+  isEditing?: boolean
+  initialData?: OrderItemFormData
 }
 
-export function OrderItemForm({ onSubmit }: OrderItemFormProps) {
+export function OrderItemForm({ onSubmit, isEditing, initialData }: OrderItemFormProps) {
   const form = useForm<OrderItemFormData>({
     resolver: zodResolver(orderItemSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      quantity: 1,
-      amount: 0,
-      weight: 0,
+      name: initialData?.name || "",
+      description: initialData?.description || "",
+      quantity: initialData?.quantity || 1,
+      amount: initialData?.amount || 0,
+      weight: initialData?.weight || 0,
     },
   })
 

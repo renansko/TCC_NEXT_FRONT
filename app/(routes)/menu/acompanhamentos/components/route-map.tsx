@@ -13,12 +13,10 @@ export function RouteMap({ selectedRoute, routes }: RouteMapProps) {
   const { mapActions: { addRoute, removeRoute, fitBounds }} = useMap();
 
   useEffect(() => {
-    if (!routes.length) return;
-
     // Clear existing routes
     routes.forEach(route => removeRoute(route.id));
 
-    // Add only selected route or all routes if none selected
+    // Add routes and fit bounds
     if (selectedRoute) {
       addRoute(selectedRoute);
       fitBounds([selectedRoute]);
@@ -26,7 +24,7 @@ export function RouteMap({ selectedRoute, routes }: RouteMapProps) {
       routes.forEach(route => addRoute(route));
       fitBounds(routes);
     }
-  }, [routes, selectedRoute]);
+  }, [routes, selectedRoute, addRoute, removeRoute, fitBounds]);
 
   return null;
 } 

@@ -18,7 +18,7 @@ export interface RouteStatus {
 export interface Route {
   id: string;
   name: string;
-  status: RouteStatus;
+  status?: RouteStatus;
   source: {
     name: string;
     location: Location;

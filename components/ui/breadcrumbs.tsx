@@ -9,6 +9,8 @@ import {
   BreadcrumbPage, 
   BreadcrumbList 
 } from "./breadcrumb"
+import Link from "next/link"
+import { Icons } from "./Icons"
 
 export function Breadcrumbs() {
   const breadcrumbs = useBreadcrumbs()
@@ -18,12 +20,16 @@ export function Breadcrumbs() {
   }
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className="flex justify-start items-center">
       <BreadcrumbList>
-        {breadcrumbs.map(({ href, text, isLast }) => (
-          <BreadcrumbItem key={href} className="hidden md:block">
+        {breadcrumbs.map(({ href, text, isLast, isHome }, index) => (
+          <BreadcrumbItem key={href} className="hidden md:inline-flex items-center">
             {isLast ? (
               <BreadcrumbPage>{text}</BreadcrumbPage>
+            ) : isHome ? (
+              <Link href="/">
+                <Icons.home />
+              </Link>
             ) : (
               <div className="flex items-center gap-2">
                 <BreadcrumbLink href={href}>{text}</BreadcrumbLink>
