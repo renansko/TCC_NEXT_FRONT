@@ -36,6 +36,8 @@ export function RouteCard({ route, isSelected, onClick, compact }: RouteCardProp
     }
   };
 
+  const isMoving = route.status?.code === 'in_progress';
+
   if (compact) {
     return (
       <Card
@@ -49,7 +51,11 @@ export function RouteCard({ route, isSelected, onClick, compact }: RouteCardProp
         <CardContent className="p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Icons.truck className="h-4 w-4 text-muted-foreground" />
+              {isMoving && (
+                <div className="animate-pulse">
+                  <Icons.truck className="h-4 w-4 text-primary" />
+                </div>
+              )}
               <span className="font-medium text-sm">{route.name}</span>
             </div>
             <Badge
@@ -59,7 +65,7 @@ export function RouteCard({ route, isSelected, onClick, compact }: RouteCardProp
                 // `bg-${route.status.color}-500/10 text-${route.status.color}-500`
               )}
             >
-              {route.status.label}
+              {route.status?.label}
             </Badge>
           </div>
 

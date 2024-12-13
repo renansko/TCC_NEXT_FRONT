@@ -7,6 +7,7 @@ export const orderSchema = z.object({
   dateRequested: z.date(),
   dateDelivery: z.date(),
   deliveryAddress: z.string().min(1, "Endereço de entrega é obrigatório"),
+  originAddress: z.string().min(1, "Endereço de origem é obrigatório"),
   status: z.string().min(1, "Status é obrigatório"),
 })
 

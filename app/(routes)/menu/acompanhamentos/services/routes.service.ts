@@ -21,7 +21,7 @@ class RoutesService {
   private startMockUpdates() {
     this.mockUpdateInterval = setInterval(() => {
       mockRoutes.forEach(route => {
-        if (route.status.code === 'in_progress') {
+        if (route.status?.code === 'in_progress') {
           const updatedRoute = simulateRouteUpdate(route);
           this.notifySubscribers(route.id, updatedRoute);
         }

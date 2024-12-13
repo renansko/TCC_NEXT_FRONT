@@ -1,6 +1,6 @@
 "use client"
 
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,24 +19,48 @@ import { Icons } from "@/components/ui/Icons"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format } from "date-fns"
+import { useEffect } from "react"
+import { useMapsLibrary } from "@/hooks/use-maps-library"
+import { AddressSearch } from "./address-search"
+import type { AddressDetails } from "../types/google-places"
 
 interface OrderFormProps {
   onSubmit: (data: OrderFormData) => void
+  isEditing?: boolean
+  initialData?: OrderFormData
 }
 
-export function OrderForm({ onSubmit }: OrderFormProps) {
+export function OrderForm({ onSubmit, isEditing, initialData }: OrderFormProps) {
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
-      itemId: "",
-      userId: "",
-      name: "",
-      dateRequested: new Date(),
-      dateDelivery: new Date(),
-      deliveryAddress: "",
-      status: "Pendente",
+      itemId: initialData?.itemId || "",
+      userId: initialData?.userId || "",
+      name: initialData?.name || "",
+      dateRequested: initialData?.dateRequested || new Date(),
+      dateDelivery: initialData?.dateDelivery || new Date(),
+      originAddress: initialData?.originAddress || "",
+      deliveryAddress: initialData?.deliveryAddress || "",
+      status: initialData?.status || "Pendente",
     },
   })
+
+  const maps = useMapsLibrary('places')
+
+  // Handle address selection with coordinates
+  const handleAddressSelect = (fieldName: keyof OrderFormData) => {
+    return (address: string, details?: AddressDetails) => {
+      form.setValue(fieldName, address)
+
+      // If we have geometry details, update coordinates
+      if (details?.geometry?.location) {
+        const { lat, lng } = details.geometry.location
+        // You might want to store these coordinates in your form data
+        // form.setValue(`${fieldName}Coordinates`, { lat, lng })
+        console.log(`${fieldName} coordinates:`, { lat, lng })
+      }
+    }
+  }
 
   return (
     <Form {...form}>
@@ -160,14 +184,41 @@ export function OrderForm({ onSubmit }: OrderFormProps) {
           </FormItem>
         )}
       />
-      <FormField
+      <Controller
+        name="originAddress"
         control={form.control}
+        rules={{ required: "Endereço de origem é obrigatório" }}
+        render={({ field, fieldState }) => (
+          <FormItem>
+            <FormLabel>Endereço de Origem</FormLabel>
+            <FormControl>
+              <AddressSearch
+                label="Endereço de Origem"
+                placeholder="Digite o endereço de origem"
+                field={field}
+                error={fieldState.error}
+                onAddressSelect={handleAddressSelect("originAddress")}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <Controller
         name="deliveryAddress"
-        render={({ field }) => (
+        control={form.control}
+        rules={{ required: "Endereço de entrega é obrigatório" }}
+        render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel>Endereço de Entrega</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <AddressSearch
+                label="Endereço de Entrega"
+                placeholder="Digite o endereço de entrega"
+                field={field}
+                error={fieldState.error}
+                onAddressSelect={handleAddressSelect("deliveryAddress")}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
